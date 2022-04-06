@@ -7,9 +7,7 @@ Bridge is a collection of scripts that help you export various metrices from hos
 
 ## Why did we write Bridge?
 
-We wrote bridge to collect and export Electronic Medical Record System version details of 720+ hosts to a cloud-based data repo. There, the data is visualized for stakeholders that don't have access to our local network.
-
-We got a little bit carried away and started exporting more metrices other than just version details and essentially started writing Bridge.
+We wrote bridge to collect and export version details of 720+ Health Information Systems. We got a little bit carried away and started exporting more metrices other than just version details and essentially ended up with Bridge.
 
 ## How does Bridge work?
 
