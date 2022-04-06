@@ -26,7 +26,6 @@ for count, host in enumerate(hosts):
     user_name = host["fields"]["username"]
     site_name = host["fields"]["name"]
 
-    # lets make sure we can get to the host
     if net.host_is_reachable(ip_address=ip_address):
         print(f"{site_name} is reachable")
 
@@ -46,5 +45,3 @@ for count, host in enumerate(hosts):
                 #! [TODO] one can wish to have a better performing implementation
                 exporter.send_data(endpoint=os.getenv(
                     'EXPORTER_ENDPOINT'), payload=app_version, headers=headers)
-    else:
-        print(f"{site_name} is not reachable")
