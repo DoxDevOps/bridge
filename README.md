@@ -5,9 +5,15 @@
 
 Bridge is a collection of scripts that help you export various metrices from hosts within your local network to a cloud central data repo.
 
-## Why we wrote Bridge?
+## Why did we write Bridge?
 
-We manage over ~800 remote hosts running Electronic Medical Record Systems (EMRS) somewhere in Africa! We wrote bridge to collect EMRS version data and export them to cloud data repo where it is visualized for stakeholders that don't have access of our local network. P.S. we got a little bit carried away and started exporting more metrices other than just version details.
+We manage over ~800 remote hosts running Electronic Medical Record Systems (EMRS) somewhere in Africa! We wrote bridge to collect EMRS version data and export them to cloud data repo where it is visualized for stakeholders that don't have access to our local network. P.S. we got a little bit carried away and started exporting more metrices other than just version details.
+
+## How does Bridge work?
+
+1. We have a database of details of all hosts within our network. Thus, ip addresses, hostnames, etc. The data in this database is accessible via a simple REST API.
+2. An exporter get these host details, loops through them and collect relevant data
+3. This data is then sent to a cloud data repo for visualization
 
 ## Installation
 
