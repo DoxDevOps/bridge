@@ -3,15 +3,11 @@
 
 ![example workflow](https://github.com/DoxDevOps/bridge/actions/workflows/python-package.yml/badge.svg)
 
-Bridge is a collection of scripts that help you export various metrices of remote hosts to a central data repo.
+Bridge is a collection of scripts that help you export various metrices from hosts within your local network to a cloud central data repo.
 
 ## Why we wrote Bridge?
 
-We manage over ~800 remote hosts running Electronic Medical Record Systems (EMRS) somewhere in Africa! Each EMRS site is independent - with some sites connected to a central hub over an intermittent VPN connection. We wrote bridge to collect EMRS version data for connected sites. And got a little bit carried away and started exporting more metrices.
-
-## Alternatives
-
-Depending on your environment, you can use better monitoring systems (like Prometheus).
+We manage over ~800 remote hosts running Electronic Medical Record Systems (EMRS) somewhere in Africa! We wrote bridge to collect EMRS version data and export them to cloud data repo where it is visualized for stakeholders that don't have access of our local network. P.S. we got a little bit carried away and started exporting more metrices other than just version details.
 
 ## Installation
 
