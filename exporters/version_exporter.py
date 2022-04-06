@@ -11,7 +11,7 @@ hosts = importer.get_hosts_from_api(os.getenv('IMPORTER_ENDPOINT'))
 # list of app dirs as defined in the .env
 app_dirs = os.getenv('APP_DIRS').split(',')
 
-# when we sending data to a central repo, this is the default header
+# default headers
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 
 if not hosts:
