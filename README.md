@@ -3,17 +3,19 @@
 
 ![example workflow](https://github.com/DoxDevOps/bridge/actions/workflows/python-package.yml/badge.svg)
 
-Bridge is a collection of scripts that help you export various metrices from hosts within your local network to a cloud central data repo.
+Bridge is a collection of scripts that help you export various metrices from hosts within your local network to a cloud-based data repo.
 
 ## Why did we write Bridge?
 
-We manage over ~800 hosts running Electronic Medical Record Systems (EMRS) somewhere in Africa! We wrote bridge to collect and export EMRS version data to a cloud data repo. This data is then visualized for stakeholders that don't have access to our local network. P.S. we got a little bit carried away and started exporting more metrices other than just version details.
+We wrote bridge to collect and export Electronic Medical Record System version details of 720+ hosts to a cloud-based data repo. There, the data is visualized for stakeholders that don't have access to our local network.
+
+We got a little bit carried away and started exporting more metrices other than just version details and essentially started writing Bridge.
 
 ## How does Bridge work?
 
 1. We have a database of details of all hosts within our network. Thus, ip addresses, hostnames, etc. The data in this database is accessible via a simple REST API.
-2. An exporter gets these host details, loops through them and collect relevant data
-3. This data is then sent to a cloud data repo for visualization
+2. Bridge gets these host details, loop through them and collect relevant data
+3. This data is then sent to a cloud-based data repo for visualization
 
 ## Installation
 
