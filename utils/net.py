@@ -14,7 +14,7 @@ def host_is_reachable(ip_address: str) -> bool:
 
     param = '-n' if platform.system().lower() == 'windows' else '-c'
 
-    if not subprocess.call(['ping', param, '1', ip_address]) == 0:
+    if subprocess.call(['ping', param, '1', ip_address]) != 0:
         return False
 
     return True
