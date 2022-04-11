@@ -14,7 +14,7 @@ def get_versions(ip_address: str, user_name: str, headers: dict) -> bool:
         if version != "failed_to_get_version":
 
             app_version = {"ip_address": ip_address,
-                           f"{app_dir}": app_dir, "version": version}
+                           "app_dir": app_dir, "version": version}
 
             if not imp_exp_func.send_data(os.getenv('EXPORTER_ENDPOINT'), app_version, headers):
 
