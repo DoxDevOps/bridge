@@ -42,7 +42,7 @@ mv .env.example .env
 vim .env
 ```
 
-5. All exporters are in exporters directory. You can choose to set up cron jobs for the exporters to schedule when they should run. You can read more on how to set up a cron job here: <https://www.digitalocean.com/community/tutorials/how-to-use-cron-to-automate-tasks-ubuntu-1804>. To manually run an exporter (e.g. running the version exporter):
+5. All exporters are within exporter.py. You can add more exporters to the file then simply call it under bridge.py. You can choose to set up cron jobs for the exporters to schedule when they should run. You can read more on how to set up a cron job here: <https://www.digitalocean.com/community/tutorials/how-to-use-cron-to-automate-tasks-ubuntu-1804>. To manually run an exporter (e.g. running the version exporter):
 
 ```bash
 cd exporters
