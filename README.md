@@ -1,4 +1,6 @@
 
+![example workflow](https://github.com/DoxDevOps/bridge/actions/workflows/CI.yml/badge.svg)
+
 # Bridge
 
 Bridge is a collection of scripts that helps you export various metrices from hosts within your local network to a cloud-based data repo.
