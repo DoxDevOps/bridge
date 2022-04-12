@@ -5,9 +5,9 @@ load_dotenv()
 
 
 @decorators.check_if_host_is_reachable
-def get_versions(ip_address: str, user_name: str, headers: dict) -> bool:
+def get_versions(ip_address: str, user_name: str, app_dirs: list, headers: dict) -> bool:
 
-    for app_dir in os.getenv('APP_DIRS').split(','):
+    for app_dir in app_dirs:
 
         version = remote.get_app_version(user_name, ip_address, app_dir)
 

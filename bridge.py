@@ -6,6 +6,7 @@ load_dotenv()
 
 hosts = imp_exp_func.get_data_from_api(os.getenv('IMPORTER_ENDPOINT'))
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+app_dirs = os.getenv('APP_DIRS').split(',')
 
 for host in hosts:
 
@@ -13,4 +14,4 @@ for host in hosts:
     user_name = host["fields"]["username"]
     site_name = host["fields"]["name"]
 
-    get_versions(ip_address, user_name, headers)
+    get_versions(ip_address, user_name, app_dirs, headers)
