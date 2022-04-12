@@ -1,7 +1,7 @@
 
 # Bridge
 
-![example workflow](https://github.com/DoxDevOps/bridge/actions/workflows/python-package.yml/badge.svg)
+![example workflow](https://github.com/DoxDevOps/bridge/actions/workflows/CI.yml/badge.svg)
 
 Bridge is a collection of scripts that helps you export various metrices from hosts within your local network to a cloud-based data repo.
 
