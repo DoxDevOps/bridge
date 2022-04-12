@@ -23,7 +23,7 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
     return "{0.stdout}".format(run_cmd).strip()
 
 
-def get_os_version(user_name: str, ip_address: str) -> str:
+def get_host_os(user_name: str, ip_address: str) -> str:
     """gets version of operating system running on remote server
 
     Args:

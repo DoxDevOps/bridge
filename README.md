@@ -1,4 +1,5 @@
 
+![alt text](https://github.com/DoxDevOps/bridge/blob/main/assets/bridge.png?raw=true)
 ![example workflow](https://github.com/DoxDevOps/bridge/actions/workflows/CI.yml/badge.svg)
 
 # Bridge
