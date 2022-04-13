@@ -9,6 +9,9 @@ def get_versions(ip_address: str, user_name: str, app_dirs: list, headers: dict)
 
     for app_dir in app_dirs:
 
+        print(
+            f"*** Starting to export version details for {app_dir} for host {ip_address}")
+
         version = remote.get_app_version(user_name, ip_address, app_dir)
 
         if version != "failed_to_get_version":
