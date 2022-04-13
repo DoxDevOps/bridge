@@ -17,7 +17,8 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
             f"{user_name}@{ip_address}").run(f"cd {app_dir} && git describe", hide=True)
 
     except Exception as e:
-        print(e)
+        print(
+            f"--- Failed to get version for {ip_address} for {app_dir} with exception: {e} ---")
         return "failed_to_get_version"
 
     return "{0.stdout}".format(run_cmd).strip()
