@@ -1,3 +1,4 @@
+from curses import echo
 from fabric import Connection
 
 
@@ -14,7 +15,7 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
     """
     try:
         run_cmd = Connection(
-            f"{user_name}@{ip_address}").run(f"cd {app_dir} && git describe", hide=True)
+            f"{user_name}@{ip_address}").run(f"cd {app_dir} && git describe", hide=True, echo=True)
 
     except Exception as e:
         print(
