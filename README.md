@@ -46,4 +46,4 @@ vim .env
 python bridge.py
 ```
 
-6. All exporters are within exporter.py. You can add more exporters to the file then simply call it under bridge.py. You can choose to set up cron jobs for the exporters to schedule when they should run. You can read more on how to set up a cron job here: <https://www.digitalocean.com/community/tutorials/how-to-use-cron-to-automate-tasks-ubuntu-1804>.
+6. All exporters are within exporter.py and are called within bridge.py. You can add more exporters to the file then simply call them within bridge.py. You can choose to set up cron jobs for the exporters to schedule when bridge should run. You can read more on how to set up a cron job here: <https://www.digitalocean.com/community/tutorials/how-to-use-cron-to-automate-tasks-ubuntu-1804>.
