@@ -4,7 +4,23 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-hosts = imp_exp_func.get_data_from_api(os.getenv('IMPORTER_ENDPOINT'))
+os_name = 'nul'
+os_version = 'nul'
+
+for key, value in os.environ.items():
+    #print('{}: {}'.format(key, value))
+    if key == 'XDG_SESSION_DESKTOP':
+        os_name = value
+    if key == 'XDG_SESSION_TYPE':
+        os_version = value
+
+#check in terminal
+print("OS name: ", os_name)
+print("OS version: ", os_version)
+
+print(os.getenv('HOME'))
+
+hosts = imp_exp_func.get_data_from_api(os.getenv('HOME'))
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 app_dirs = os.getenv('APP_DIRS').split(',')
 
