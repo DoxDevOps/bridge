@@ -1,4 +1,4 @@
-from utils import imp_exp_func, remote, decorators
+from utils import imp_exp_func, remote, decorators, net
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -24,3 +24,20 @@ def get_versions(ip_address: str, user_name: str, app_dirs: list, headers: dict)
                 return False
 
             return True
+
+
+def ping_exporter(ip_address: str, headers: dict) -> bool:
+
+    status = "up"
+
+    if not net.host_is_reachable(ip_address):
+
+        status = "down"
+
+    uptime = {"ip_address": ip_address, "status": status}
+
+    if not imp_exp_func.send_data(os.getenv('PING_EXPORTER_ENDPOINT'), uptime, headers):
+
+        return False
+
+    return True

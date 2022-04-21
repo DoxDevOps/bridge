@@ -1,5 +1,5 @@
 from utils import imp_exp_func
-from exporters import get_versions
+from exporters import get_versions, ping_exporter
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -14,4 +14,8 @@ for host in hosts:
     user_name = host["fields"]["username"]
     site_name = host["fields"]["name"]
 
+    # exports versions of apps on the host
     get_versions(ip_address, user_name, app_dirs, headers)
+
+    # exports results of a ping of host
+    ping_exporter(ip_address, headers)
