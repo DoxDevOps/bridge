@@ -4,8 +4,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-hosts = imp_exp_func.get_data_from_api(
-    'http://10.44.0.52/sites/api/v1/get_sites')
+hosts = imp_exp_func.get_data_from_api(os.getenv('IMPORTER_ENDPOINT'))
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 app_dirs = os.getenv('APP_DIRS').split(',')
 
