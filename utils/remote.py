@@ -45,7 +45,7 @@ def get_host_os_name_and_version(user_name: str, ip_address: str) -> str:
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         # Establish a connection with a hard coded pasword
         # a private key will be used soon
-        ssh.connect(ip_address, username=user_name, password='letmein')
+        ssh.connect(ip_address, username=user_name, password='PASSWORD')
         # Enter the Linux command
         stdin, stdout, stderr = ssh.exec_command("cat /etc/os-release")
         # Output command execution results
