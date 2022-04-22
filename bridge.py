@@ -1,10 +1,11 @@
 from utils import imp_exp_func
-from exporters import get_versions, ping_exporter
+from exporters import get_os_details, get_versions, ping_exporter
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
-hosts = imp_exp_func.get_data_from_api(os.getenv('HOME'))
+hosts = imp_exp_func.get_data_from_api(
+    'http://10.44.0.52/sites/api/v1/get_sites')
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 app_dirs = os.getenv('APP_DIRS').split(',')
 
@@ -19,3 +20,9 @@ for host in hosts:
 
     # exports results of a ping of host
     ping_exporter(ip_address, headers)
+
+    # exports os details
+    get_os_details(ip_address, user_name, headers)
+
+# for test
+#get_os_details('10.43.156.9', 'meduser', headers)
