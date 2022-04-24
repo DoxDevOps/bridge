@@ -41,3 +41,24 @@ def ping_exporter(ip_address: str, headers: dict) -> bool:
         return False
 
     return True
+
+
+@decorators.check_if_host_is_reachable
+def get_os_details(ip_address: str, user_name: str, headers: dict) -> bool:
+
+    print(
+        f"*** Starting to export os details for host {ip_address}")
+
+    details = remote.get_host_os_name_and_version(user_name, ip_address)
+
+    if type(details) == list:
+
+        host_details = {"ip_address": ip_address,
+                        "os_name": details[0],
+                        "version": details[1]}
+
+        if not imp_exp_func.send_data(os.getenv('EXPORTER_ENDPOINT'), host_details, headers):
+
+            return False
+
+        return True

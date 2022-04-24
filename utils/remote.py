@@ -1,5 +1,7 @@
 from curses import echo
+import re
 from fabric import Connection
+import paramiko
 
 
 def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
@@ -25,7 +27,7 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
     return "{0.stdout}".format(run_cmd).strip()
 
 
-def get_host_os(user_name: str, ip_address: str) -> str:
+def get_host_os_name_and_version(user_name: str, ip_address: str) -> str:
     """gets version of operating system running on remote server
 
     Args:
@@ -36,11 +38,28 @@ def get_host_os(user_name: str, ip_address: str) -> str:
         str: version of operating system on remote server
     """
     try:
-        run_cmd = Connection(
-            f"{user_name}@{ip_address}").run("uname -a", hide=True)
+
+        ssh = paramiko.SSHClient()
+        # ssh.load_host_keys('/home/username/.ssh/known_hosts')
+        # ssh.load_system_host_keys()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # Establish a connection with a hard coded pasword
+        # a private key will be used soon
+        ssh.connect(ip_address, username=user_name, password='PASSWORD')
+        # Enter the Linux command
+        stdin, stdout, stderr = ssh.exec_command("cat /etc/os-release")
+        # Output command execution results
+        result = stdout.read().splitlines()
+        # string of both os name and version
+        inputstring = f"{result[0]} {result[1]}"
+        # array of both os anme and version
+        collection = re.findall('"([^"]*)"', inputstring)
+        # Close the connection
+        ssh.close()
 
     except Exception as e:
-        print(e)
-        return "failed_to_get_version"
+        print(
+            f"--- Failed to get os_name and os_version for {ip_address} with exception: {e} ---")
+        return "failed_to_get_os_name_and_version"
 
-    return "{0.stdout}".format(run_cmd).strip()
+    return collection
