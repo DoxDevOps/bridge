@@ -106,6 +106,9 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         # remaining_ram
         collection.append(ram_utilazation[6])
 
+        # Close the connection
+        ssh.close()
+
     except Exception as e:
         print(
             f"--- Failed to get os_name and os_version for {ip_address} with exception: {e} ---")
