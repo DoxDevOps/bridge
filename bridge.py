@@ -1,5 +1,5 @@
 from utils import imp_exp_func
-from exporters import get_os_details, get_versions, ping_exporter
+from exporters import get_host_details, get_versions, ping_exporter
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -21,7 +21,7 @@ for host in hosts:
     ping_exporter(ip_address, headers)
 
     # exports os details
-    get_os_details(ip_address, user_name, headers)
+    get_host_details(ip_address, user_name, headers)
 
 # for test
-#get_os_details('10.43.156.9', 'meduser', headers)
+# get_host_details('10.43.156.9', 'meduser', headers)

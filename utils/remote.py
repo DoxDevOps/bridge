@@ -57,7 +57,7 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         # Establish a connection with a hard coded pasword
         # a private key will be used soon
-        ssh.connect(ip_address, username=user_name, password='PASSWORD')
+        ssh.connect(ip_address, username=user_name, password='123456')
         # Linux command for system version inf
         stdin, stdout, stderr = ssh.exec_command("cat /etc/os-release")
         # Output command execution results
@@ -111,7 +111,7 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
 
     except Exception as e:
         print(
-            f"--- Failed to get os_name and os_version for {ip_address} with exception: {e} ---")
-        return "failed_to_get_os_name_and_version"
+            f"--- Failed to get host system details for {ip_address} with exception: {e} ---")
+        return "failed_to_get_host_system_details"
 
     return collection
