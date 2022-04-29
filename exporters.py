@@ -65,7 +65,6 @@ def get_os_details(ip_address: str, user_name: str, headers: dict) -> bool:
                         "used_ram": details[8],
                         "remaining_ram": details[9]
                         }
-        print(host_details)
 
         if not imp_exp_func.send_data(os.getenv('EXPORTER_ENDPOINT'), host_details, headers):
 
