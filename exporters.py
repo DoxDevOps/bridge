@@ -49,13 +49,23 @@ def get_os_details(ip_address: str, user_name: str, headers: dict) -> bool:
     print(
         f"*** Starting to export os details for host {ip_address}")
 
-    details = remote.get_host_os_name_and_version(user_name, ip_address)
+    details = remote.get_host_system_details(user_name, ip_address)
 
     if type(details) == list:
 
         host_details = {"ip_address": ip_address,
                         "os_name": details[0],
-                        "version": details[1]}
+                        "os_version": details[1],
+                        "cpu_utilization": details[2],
+                        "hdd_total_storage": details[3],
+                        "hdd_remaing_storage": details[4],
+                        "hdd_used_storage": details[5],
+                        "hdd_remaing_in_percentiles": details[6],
+                        "total_ram": details[7],
+                        "used_ram": details[8],
+                        "remaining_ram": details[9]
+                        }
+        print(host_details)
 
         if not imp_exp_func.send_data(os.getenv('EXPORTER_ENDPOINT'), host_details, headers):
 
