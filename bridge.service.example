@@ -1,0 +1,22 @@
+[Unit]
+Description = Network Exporter Service
+After       = network.target
+
+[Service]
+Group=www-data
+WorkingDirectory=/home/meduser/apps/bridge
+Environment="PATH=/home/meduser/apps/bridge/venv/bin"
+ExecStart=/usr/bin/python  /home/meduser/apps/bridge/start.py
+
+
+# In case if it gets stopped, restart it immediately
+Restart = always
+
+Type = simple
+
+
+[Install]
+# multi-user.target corresponds to run level 3
+# roughtly meaning wanted by system start
+WantedBy    = multi-user.target
+
