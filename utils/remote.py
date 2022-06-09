@@ -44,3 +44,24 @@ def get_os_details(user_name: str, ip_address: str) -> str:
             f"--- Failed to get OS version for {ip_address} with exception: {e} ---")
         return "failed_to_get_version"
     return "{0.stdout}".format(run_cmd).strip()
+
+    def get_disk_usage_details(user_name: str, ip_address: str) -> str:
+    """gets disk usage details on remote server
+    Args:
+        user_name (str): remote user name
+        ip_address (str): ip address of remote server
+    Returns:
+        str: Disk usage details on remote server
+    """
+    try:
+        run_cmd_disk = Connection(
+            f"{user_name}@{ip_address}").run(f"df -h / | tail -n1 ", hide=True, echo=True)
+        print(run_cmd_disk)
+
+    except Exception as e:
+        print(
+            f"--- Failed to get disk usage information for {ip_address} with exception: {e} ---")
+        return "failed_to_get_disk_information"
+    return "{0.stdout}".format(run_cmd_disk).strip()
+
+
