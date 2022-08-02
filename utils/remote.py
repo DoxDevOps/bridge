@@ -57,6 +57,7 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         # Establish a connection with a hard coded pasword
         # a private key will be used soon
+        #                                           AUTO SSH IS NEEDED ON THIS
         ssh.connect(ip_address, username=user_name, password='123456')
         # Linux command for system version inf
         stdin, stdout, stderr = ssh.exec_command("cat /etc/os-release")
