@@ -31,7 +31,8 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
                 ssh.connect(ip_address, username=user_name, password=each_password)
                 stdin, stdout, stderr = ssh.exec_command(f"cd {app_dir} && git describe")
                 result = stdout.read().splitlines()
-                version = f"{result[0]} {result[1]}"
+                inputstring = f"{result[0]}}"
+                version = re.findall('"([^"]*)"', inputstring)
                 print("###################")
                 print(version)
                 print("###################")
