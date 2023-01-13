@@ -22,4 +22,3 @@ for host in hosts:
 
     # exports os details
     get_host_details(ip_address, user_name, headers)
-
