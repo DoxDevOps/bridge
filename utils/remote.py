@@ -6,7 +6,6 @@ from config.config import data
 
 _PASSWORDS_ = data["PASSWORD"]
 
-
 def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
     """gets version of an application running on remote server
 
@@ -19,15 +18,29 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
         str: version of application on remote server
     """
     try:
-        run_cmd = Connection(
-            f"{user_name}@{ip_address}").run(f"cd {app_dir} && git describe", hide=True, echo=True)
+        ssh = paramiko.SSHClient()
+        # ssh.load_host_keys('/home/username/.ssh/known_hosts')
+        # ssh.load_system_host_keys()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # Establish a connection with a hard coded pasword
+        # a private key will be used soon
+        # AUTO SSH IS NEEDED ON THIS
 
+        for each_password in _PASSWORDS_:
+            try:
+                ssh.connect(ip_address, username=user_name, password=each_password)
+                stdin, stdout, stderr = ssh.exec_command(f"cd {app_dir} && git describe", hide=True, echo=True)
+                result = stdout.read().splitlines()
+                version = f"{result[0]} {result[1]}"
+
+            except Exception as e:
+                print(
+                    f"--- Failed to get version for {ip_address} for {app_dir} with exception: {e} ---")
+                return "failed_to_get_version"
+
+            return version
     except Exception as e:
-        print(
-            f"--- Failed to get version for {ip_address} for {app_dir} with exception: {e} ---")
-        return "failed_to_get_version"
-
-    return "{0.stdout}".format(run_cmd).strip()
+        print("An error occured: ", e)
 
 
 def get_host_system_details(user_name: str, ip_address: str) -> str:
