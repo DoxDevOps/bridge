@@ -71,8 +71,8 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
         
         print(host_details)
 
-        # if not imp_exp_func.send_data(os.getenv('SYSTEM_UTI_ENDPOINT'), host_details, headers):
+        if not imp_exp_func.send_data(os.getenv('SYSTEM_UTI_ENDPOINT'), host_details, headers):
 
-            # return False
+            return False
 
         return True
