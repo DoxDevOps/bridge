@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 hosts = imp_exp_func.get_data_from_api(os.getenv('IMPORTER_ENDPOINT'))
-headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+headers = {'Content-type': 'application/json', 'Accept': 'text/plain','Authorization': os.getenv('EXPORTER_KEY')}
 app_dirs = os.getenv('APP_DIRS').split(',')
 
 for host in hosts:
