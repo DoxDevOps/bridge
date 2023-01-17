@@ -32,19 +32,15 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
                 stdin, stdout, stderr = ssh.exec_command(f"cd {app_dir} && git describe")
                 result = stdout.read().splitlines()
                 version = f"{result[0]}".split("'")[1]
-                print("###################")
-                print(version)
-                print("###################")
                 ssh.close()
+                return version
 
             except Exception as e:
-                print(
-                    f"--- Failed to get version for {ip_address} for {app_dir} with exception: {e} ---")
-                return "failed_to_get_version"
+                print("An error occured: ", e)
 
-            return version
     except Exception as e:
-        print("An error occured: ", e)
+        print(f"--- Failed to get version for {ip_address} for {app_dir} with exception: {e} ---")
+        return "failed_to_get_version"
 
 
 def get_host_system_details(user_name: str, ip_address: str) -> str:
