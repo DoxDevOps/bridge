@@ -19,12 +19,11 @@ def get_versions(ip_address: str, user_name: str, app_dirs: list, headers: dict)
             app_version = {"ip_address": ip_address,
                            "app_dir": app_dir, "version": version}
 
-            print(app_version)
-
-            try:
-                imp_exp_func.send_data(os.getenv('EXPORTER_ENDPOINT'), app_version, headers)
-            except  Exception as e:
-                print("An error occured: ", e)
+            if version is not None:
+                try:
+                    imp_exp_func.send_data(os.getenv('EXPORTER_ENDPOINT'), app_version, headers)
+                except  Exception as e:
+                    print("An error occured: ", e)
 
 
 
