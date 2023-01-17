@@ -36,7 +36,10 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
                 print("########################################")
                 print(version)
                 print("########################################")
-                return version
+                if version:
+                    return version
+                else:
+                    return "failed_to_get_version"
 
             except Exception as e:
                 print("An error occured: ", e)
