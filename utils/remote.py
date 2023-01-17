@@ -33,6 +33,9 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
                 result = stdout.read().splitlines()
                 version = f"{result[0]}".split("'")[1]
                 ssh.close()
+                print("########################################")
+                print(version)
+                print("########################################")
                 return version
 
             except Exception as e:

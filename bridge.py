@@ -21,4 +21,4 @@ for host in hosts:
     ping_exporter(ip_address, headers)
 
     # exports os details
-    get_host_details(ip_address, user_name, headers)
+    # get_host_details(ip_address, user_name, headers)
