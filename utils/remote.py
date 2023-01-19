@@ -164,9 +164,9 @@ def get_host_remote_serial_number(user_name: str, ip_address: str) -> str:
                 session.set_combine_stderr(True)
                 session.get_pty()
                 #for testing purposes we want to force sudo to always to ask for password. because of that we use "-k" key
-                session.exec_command("sudo dmidecode -s system-serial-number")
-                stdin = session.makefile('wb', -1)
-                stdout = session.makefile('rb', -1)
+                stdin, stdout, stderr = session.exec_command("sudo dmidecode -s system-serial-number")
+                # stdin = session.makefile('wb', -1)
+                # stdout = session.makefile('rb', -1)
                 #you have to check if you really need to send password here 
                 stdin.write(each_password +'\n')
                 stdin.flush()
