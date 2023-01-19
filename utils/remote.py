@@ -169,7 +169,7 @@ def get_host_remote_serial_number(user_name: str, ip_address: str) -> str:
                 # stdout = session.makefile('rb', -1)
                 #you have to check if you really need to send password here 
                 stdin.write(each_password +'\n')
-                stdin.flush()
+                # stdin.flush()
                 serial_number = stdout.read().splitlines()
                 serial_number = f"{serial_number[0]}".split("'")[1]
                 print ("#########################")
