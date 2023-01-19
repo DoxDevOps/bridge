@@ -170,10 +170,15 @@ def get_host_remote_serial_number(user_name: str, ip_address: str) -> str:
                 #you have to check if you really need to send password here 
                 stdin.write(each_password +'\n')
                 stdin.flush()
-                for line in stdout.read().splitlines():        
-                    print ("#########################")
-                    print(line)
-                    print ("#########################")
+                serial_number = stdout.read().splitlines()
+                serial_number = f"{serial_number[0]}".split("'")[1]
+                print ("#########################")
+                print(serial_number)
+                print ("#########################")
+                # for line in stdout.read().splitlines():        
+                #     print ("#########################")
+                #     print(line)
+                #     print ("#########################")
                 # # Linux command for system version inf
                 # stdin, stdout, stderr = ssh.exec_command("cat /etc/os-release")
                 # # Output command execution results
