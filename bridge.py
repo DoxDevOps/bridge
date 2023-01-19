@@ -24,4 +24,4 @@ for host in hosts:
     # get_host_details(ip_address, user_name, headers)
 
     # exports host serial number
-    get_host_serial_number()
+    get_host_serial_number(ip_address, user_name, headers)
