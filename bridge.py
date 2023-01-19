@@ -1,5 +1,5 @@
 from utils import imp_exp_func
-from exporters import get_host_details, get_versions, ping_exporter
+from exporters import get_versions, ping_exporter, get_host_details, get_host_serial_number
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -22,3 +22,6 @@ for host in hosts:
 
     # exports os details
     # get_host_details(ip_address, user_name, headers)
+
+    # exports host serial number
+    get_host_serial_number()

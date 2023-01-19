@@ -77,3 +77,13 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
             return False
 
         return True
+
+@decorators.check_if_host_is_reachable
+def get_host_serial_number(ip_address: str, user_name: str, headers: dict) -> bool:
+
+    print(
+        f"*** Starting to export host serial number {ip_address}")
+
+    serial_number = remote.get_host_remote_serial_number(user_name, ip_address)
+
+    print(serial_number)

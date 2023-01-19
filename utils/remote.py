@@ -33,9 +33,6 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
                 result = stdout.read().splitlines()
                 version = f"{result[0]}".split("'")[1]
                 ssh.close()
-                print("########################################")
-                print(version)
-                print("########################################")
                 return version
 
             except Exception as e:
@@ -138,3 +135,57 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         print(
             f"--- Failed to get host system details for {ip_address} with exception: {e} ---")
         return "failed_to_get_host_system_details"
+
+def get_host_remote_serial_number(user_name: str, ip_address: str) -> str:
+    """gets serial number of the remote host
+
+    Args:
+        user_name (str): remote user name
+        ip_address (str): ip address of remote server
+
+    Returns:
+        str: serial_number
+    """
+
+    try:
+        ssh = paramiko.SSHClient()
+        # ssh.load_host_keys('/home/username/.ssh/known_hosts')
+        # ssh.load_system_host_keys()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # Establish a connection with a hard coded pasword
+        # a private key will be used soon
+        # AUTO SSH IS NEEDED ON THIS
+        
+        for each_password in _PASSWORDS_:
+            try:
+                ssh.connect(ip_address, username=user_name, password=each_password)
+                transport = ssh.get_transport()
+                session = transport.open_session()
+                session.set_combine_stderr(True)
+                session.get_pty()
+                #for testing purposes we want to force sudo to always to ask for password. because of that we use "-k" key
+                session.exec_command("sudo -k dmesg")
+                stdin = session.makefile('wb', -1)
+                stdout = session.makefile('rb', -1)
+                #you have to check if you really need to send password here 
+                stdin.write(each_password +'\n')
+                stdin.flush()
+                for line in stdout.read().splitlines():        
+                    print (ip_address, line)
+                # # Linux command for system version inf
+                # stdin, stdout, stderr = ssh.exec_command("cat /etc/os-release")
+                # # Output command execution results
+                # result = stdout.read().splitlines()
+                # serial_number = f"{result[0]}".split("'")[1]
+                # ssh.close()
+                # return serial_number
+
+            except Exception as e:
+                print("An error occured: ", e)
+
+    except Exception as e:
+        print(
+            f"--- Failed to get host system details for {ip_address} with exception: {e} ---")
+        return "failed_to_get_host_system_details"
+
+get_host_remote_serial_number(user_name='emruser', ip_address='10.40.11.3')
