@@ -189,5 +189,3 @@ def get_host_remote_serial_number(user_name: str, ip_address: str) -> str:
         print(
             f"--- Failed to get host system details for {ip_address} with exception: {e} ---")
         return "failed_to_get_host_system_details"
-
-get_host_remote_serial_number(user_name='emruser', ip_address='10.40.11.3')
