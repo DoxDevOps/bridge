@@ -54,9 +54,6 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
 
     if type(details) == list:
 
-        hdd_used_in_percentiles = (int(''.join(filter(str.isdigit, details[5]))) /
-                                        int(''.join(filter(str.isdigit, details[3])))) * 100
-
         host_details = {"ip_address": ip_address,
                         "os_name": details[0],
                         "os_version": details[1],
@@ -64,7 +61,7 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
                         "hdd_total_storage": details[3],
                         "hdd_remaining_storage": details[4],
                         "hdd_used_storage": details[5],
-                        "hdd_remaining_in_percentiles": f"{int(hdd_used_in_percentiles)}%",
+                        "hdd_remaining_in_percentiles": details[6],
                         "total_ram": details[7],
                         "used_ram": details[8],
                         "remaining_ram": details[9]
