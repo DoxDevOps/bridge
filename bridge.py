@@ -21,7 +21,7 @@ def init():
         get_versions(ip_address, user_name, app_dirs, headers)
 
         # exports results of a ping of host
-        ping_exporter(ip_address, headers)
+        # ping_exporter(ip_address, headers)
 
         # exports os details
         get_host_details(ip_address, user_name, headers)
