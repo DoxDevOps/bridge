@@ -28,6 +28,7 @@ def init():
 
 # run job every 3 hrs
 # for now
+init()
 schedule.every(2).hours.do(init)
 while True:
         schedule.run_pending()
