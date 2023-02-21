@@ -10,7 +10,7 @@ After       = network.target
 [Service]
 Type=forking
 WorkingDirectory={install_dir}
-ExecStart=/usr/bin/python3 bridge.py
+ExecStart=/bin/sh -c "/usr/bin/python3 {install_dir}/bridge.py"
 
 # In case if it gets stopped, restart it immediately
 Restart     = always
