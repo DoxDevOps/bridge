@@ -13,6 +13,8 @@ def init():
     headers = {'Content-type': 'application/json',
                'Accept': 'text/plain', 'Authorization': os.getenv('EXPORTER_KEY')}
     app_dirs = os.getenv('APP_DIRS').split(',')
+    # define a list to keep track of all processes
+    processes = []
 
     for host in hosts:
 
@@ -26,6 +28,8 @@ def init():
             ip_address, user_name, headers,))
         # start the process
         process_1.start()
+        # add the process to the list
+        processes.append(process_1)
 
         # create a new process instance
         # exports os details
@@ -33,9 +37,15 @@ def init():
                             args=(ip_address, user_name, headers,))
         # start the process
         process_2.start()
+        # add the process to the list
+        processes.append(process_2)
 
         # exports results of a ping of host
         # ping_exporter(ip_address, headers)
+
+    # wait for all processes to finish
+    for process in processes:
+        process.join()
 
 
 if __name__ == '__main__':
