@@ -47,17 +47,13 @@ def init():
     for process in processes:
         process.join()
 
+    return True
+
 
 if __name__ == '__main__':
-    # run job every 2 hrs
-    # for now
     start_time = time.time()
-    init()
-    end_time = time.time()
-    runtime = end_time - start_time
-    print("########################################################################################################")
-    print("Runtime: ", runtime, " seconds")
-    # schedule.every(2).hours.do(init)
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)
+    if init():
+        end_time = time.time()
+        runtime = end_time - start_time
+        print("########################################################################################################")
+        print("Runtime: ", runtime, " seconds")
