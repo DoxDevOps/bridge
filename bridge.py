@@ -9,6 +9,7 @@ load_dotenv()
 
 
 def init():
+    start_time = time.time()
     hosts = imp_exp_func.get_data_from_api(os.getenv('IMPORTER_ENDPOINT'))
     headers = {'Content-type': 'application/json',
                'Accept': 'text/plain', 'Authorization': os.getenv('EXPORTER_KEY')}
@@ -46,6 +47,10 @@ def init():
     # wait for all processes to finish
     for process in processes:
         process.join()
+
+    end_time = time.time()
+    runtime = end_time - start_time
+    print("Runtime: ", runtime, " seconds")
 
 
 if __name__ == '__main__':
