@@ -50,6 +50,7 @@ def init():
 
     end_time = time.time()
     runtime = end_time - start_time
+    print("########################################################################################################")
     print("Runtime: ", runtime, " seconds")
 
 
