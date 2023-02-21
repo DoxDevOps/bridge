@@ -8,8 +8,9 @@ Description = bridge service
 After       = network.target
 
 [Service]
+Type=forking
 WorkingDirectory={install_dir}
-ExecStart=/usr/bin/python3 {install_dir}/bridge.py
+ExecStart=/usr/bin/python3 bridge.py
 
 # In case if it gets stopped, restart it immediately
 Restart     = always
@@ -32,10 +33,10 @@ def setup_autostart():
 
     run('sudo systemctl stop bridge.service', die_on_fail=False)
     run('sudo cp tmp/bridge.service /etc/systemd/system')
+    run('sudo systemctl daemon-reload')
     run('sudo systemctl enable bridge.service')
-    print('bridge has been set to automatically start up at boot time.')
-
     run('sudo systemctl start bridge.service')
+    print('bridge.service has been set to automatically start up at boot time.')
 
 
 def run(command, die_on_fail=True):
