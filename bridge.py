@@ -1,3 +1,4 @@
+from multiprocessing import Process
 import time
 import schedule
 from utils import imp_exp_func
@@ -19,14 +20,22 @@ def init():
         user_name = host["fields"]["username"]
         site_name = host["fields"]["name"]
 
+        # create a new process instance
         # exports versions of apps on the host
-        get_versions(ip_address, user_name, app_dirs, headers)
+        process_1 = Process(target=get_versions, args=(
+            ip_address, user_name, headers,))
+        # start the process
+        process_1.start()
+
+        # create a new process instance
+        # exports os details
+        process_2 = Process(target=get_host_details,
+                            args=(ip_address, user_name, headers,))
+        # start the process
+        process_2.start()
 
         # exports results of a ping of host
         # ping_exporter(ip_address, headers)
-
-        # exports os details
-        get_host_details(ip_address, user_name, headers)
 
 
 if __name__ == '__main__':
