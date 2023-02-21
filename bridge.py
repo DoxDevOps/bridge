@@ -9,7 +9,6 @@ load_dotenv()
 
 
 def init():
-    start_time = time.time()
     hosts = imp_exp_func.get_data_from_api(os.getenv('IMPORTER_ENDPOINT'))
     headers = {'Content-type': 'application/json',
                'Accept': 'text/plain', 'Authorization': os.getenv('EXPORTER_KEY')}
@@ -48,17 +47,17 @@ def init():
     for process in processes:
         process.join()
 
-    end_time = time.time()
-    runtime = end_time - start_time
-    print("########################################################################################################")
-    print("Runtime: ", runtime, " seconds")
-
 
 if __name__ == '__main__':
     # run job every 2 hrs
     # for now
+    start_time = time.time()
     init()
-    schedule.every(2).hours.do(init)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    end_time = time.time()
+    runtime = end_time - start_time
+    print("########################################################################################################")
+    print("Runtime: ", runtime, " seconds")
+    # schedule.every(2).hours.do(init)
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
