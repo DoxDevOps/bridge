@@ -31,14 +31,14 @@ def init():
         # add the process to the list
         processes.append(process_1)
 
-        # create a new process instance
-        # exports os details
-        process_2 = Process(target=get_host_details,
-                            args=(ip_address, user_name, headers,))
-        # start the process
-        process_2.start()
-        # add the process to the list
-        processes.append(process_2)
+        # # create a new process instance
+        # # exports os details
+        # process_2 = Process(target=get_host_details,
+        #                     args=(ip_address, user_name, headers,))
+        # # start the process
+        # process_2.start()
+        # # add the process to the list
+        # processes.append(process_2)
 
         # exports results of a ping of host
         # ping_exporter(ip_address, headers)
