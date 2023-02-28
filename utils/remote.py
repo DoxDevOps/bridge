@@ -26,6 +26,9 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
         # a private key will be used soon
         # AUTO SSH IS NEEDED ON THIS
 
+        # tracker
+        count = 0
+
         for each_password in _PASSWORDS_:
             try:
                 ssh.connect(ip_address, username=user_name, password=each_password)
@@ -36,7 +39,13 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
                 return version
 
             except Exception as e:
+                count += 1
                 print("An error occured: ", e)
+                if count == len(_PASSWORDS_):
+                    # Write failed IP addresses to a file
+                    with open("failed_ips.txt", "w") as f:
+                        f.write(ip_address + "\n")
+
 
     except Exception as e:
         print(f"--- Failed to get version for {ip_address} for {app_dir} with exception: {e} ---")
