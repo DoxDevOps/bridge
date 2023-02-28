@@ -31,24 +31,30 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
 
         for each_password in _PASSWORDS_:
             try:
-                ssh.connect(ip_address, username=user_name, password=each_password)
-                stdin, stdout, stderr = ssh.exec_command(f"cd {app_dir} && git describe")
+                ssh.connect(ip_address, username=user_name,
+                            password=each_password)
+                stdin, stdout, stderr = ssh.exec_command(
+                    f"cd {app_dir} && git describe")
                 result = stdout.read().splitlines()
                 version = f"{result[0]}".split("'")[1]
+
+                # Close the connection
                 ssh.close()
-                return version
+
+                collection = [version]
+                return collection
 
             except Exception as e:
-                count += 1
                 print("An error occured: ", e)
+                count += 1
                 if count == len(_PASSWORDS_):
                     # Write failed IP addresses to a file
-                    with open("failed_ips.txt", "w") as f:
+                    with open("failed_ips.txt", "a") as f:
                         f.write(ip_address + "\n")
 
-
     except Exception as e:
-        print(f"--- Failed to get version for {ip_address} for {app_dir} with exception: {e} ---")
+        print(
+            f"--- Failed to get version for {ip_address} for {app_dir} with exception: {e} ---")
         return "failed_to_get_version"
 
 
@@ -82,10 +88,11 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         # Establish a connection with a hard coded pasword
         # a private key will be used soon
         # AUTO SSH IS NEEDED ON THIS
-        
+
         for each_password in _PASSWORDS_:
             try:
-                ssh.connect(ip_address, username=user_name, password=each_password)
+                ssh.connect(ip_address, username=user_name,
+                            password=each_password)
                 # Linux command for system version inf
                 stdin, stdout, stderr = ssh.exec_command("cat /etc/os-release")
                 # Output command execution results

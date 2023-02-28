@@ -12,19 +12,18 @@ def get_versions(ip_address: str, user_name: str, app_dirs: list, headers: dict)
         print(
             f"*** Starting to export version details for {app_dir} for host {ip_address}")
 
-        version = remote.get_app_version(user_name, ip_address, app_dir)
+        details = remote.get_app_version(user_name, ip_address, app_dir)
 
-        if version != "failed_to_get_version":
+        if type(details) == list:
 
             app_version = {"ip_address": ip_address,
-                           "app_dir": app_dir, "version": version}
+                           "app_dir": app_dir, "version": details[0]}
 
-            if version is not None:
-                try:
-                    imp_exp_func.send_data(os.getenv('EXPORTER_ENDPOINT'), app_version, headers)
-                except  Exception as e:
-                    print("An error occured: ", e)
-
+            try:
+                imp_exp_func.send_data(
+                    os.getenv('EXPORTER_ENDPOINT'), app_version, headers)
+            except Exception as e:
+                print("eeror: ", e)
 
 
 def ping_exporter(ip_address: str, headers: dict) -> bool:
@@ -55,10 +54,10 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
     if type(details) == list:
 
         hdd_used_in_percentiles = str(details[6])
-        hdd_used_in_percentiles = hdd_used_in_percentiles.replace("%","")
+        hdd_used_in_percentiles = hdd_used_in_percentiles.replace("%", "")
 
         remaining_ram = str(details[9])
-        remaining_ram = remaining_ram.replace("'","")
+        remaining_ram = remaining_ram.replace("'", "")
 
         host_details = {"ip_address": ip_address,
                         "os_name": details[0],
@@ -72,7 +71,7 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
                         "used_ram": details[8],
                         "remaining_ram": remaining_ram
                         }
-        
+
         print(host_details)
 
         if not imp_exp_func.send_data(os.getenv('SYSTEM_UTI_ENDPOINT'), host_details, headers):
