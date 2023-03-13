@@ -6,6 +6,7 @@ from config.config import data
 
 _PASSWORDS_ = data["PASSWORD"]
 
+
 def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
     """gets version of an application running on remote server
 
@@ -160,34 +161,43 @@ def check_and_start_mysql_service(remote_host, ssh_username):
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(remote_host, username=ssh_username, password=password)
-            
+
             # Run the systemctl command to check the status of the MySQL service
             cmd = "systemctl status mysql.service"
             stdin, stdout, stderr = ssh.exec_command(cmd)
             output = stdout.read()
-            
+
             # Check the output for the service status
             if b"Active: active" in output:
                 print("MySQL service is running")
+                status = "running"
             else:
                 # If the service is not running, try to start it
                 print("MySQL service is not running. Attempting to start...")
                 cmd = "systemctl start mysql.service"
                 stdin, stdout, stderr = ssh.exec_command(cmd)
                 output = stdout.read()
-                
+
                 # Check the output for errors
                 if stderr:
                     print(f"Error starting MySQL service: {stderr}")
+                    status = "error"
                 else:
                     print("MySQL service started successfully")
-            
+                    status = "started"
+
             # Close the SSH connection
             ssh.close()
             break  # Stop looping once a successful connection is established
         except paramiko.AuthenticationException as e:
             print(f"Authentication failed with password '{password}': {e}")
+            status = "auth_error"
         except paramiko.SSHException as e:
-            print(f"Unable to establish SSH connection with password '{password}': {e}")
+            print(
+                f"Unable to establish SSH connection with password '{password}': {e}")
+            status = "ssh_error"
         except Exception as e:
             print(f"An error occurred with password '{password}': {e}")
+            status = "unknown_error"
+
+    return status
