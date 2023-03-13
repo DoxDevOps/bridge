@@ -151,3 +151,43 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         print(
             f"--- Failed to get host system details for {ip_address} with exception: {e} ---")
         return "failed_to_get_host_system_details"
+
+
+def check_and_start_mysql_service(remote_host, ssh_username):
+    for password in _PASSWORDS_:
+        try:
+            # Set up a SSH client and connect to the remote host
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(remote_host, username=ssh_username, password=password)
+            
+            # Run the systemctl command to check the status of the MySQL service
+            cmd = "systemctl status mysql.service"
+            stdin, stdout, stderr = ssh.exec_command(cmd)
+            output = stdout.read()
+            
+            # Check the output for the service status
+            if b"Active: active" in output:
+                print("MySQL service is running")
+            else:
+                # If the service is not running, try to start it
+                print("MySQL service is not running. Attempting to start...")
+                cmd = "systemctl start mysql.service"
+                stdin, stdout, stderr = ssh.exec_command(cmd)
+                output = stdout.read()
+                
+                # Check the output for errors
+                if stderr:
+                    print(f"Error starting MySQL service: {stderr}")
+                else:
+                    print("MySQL service started successfully")
+            
+            # Close the SSH connection
+            ssh.close()
+            break  # Stop looping once a successful connection is established
+        except paramiko.AuthenticationException as e:
+            print(f"Authentication failed with password '{password}': {e}")
+        except paramiko.SSHException as e:
+            print(f"Unable to establish SSH connection with password '{password}': {e}")
+        except Exception as e:
+            print(f"An error occurred with password '{password}': {e}")
