@@ -3,7 +3,7 @@ import re
 from fabric import Connection
 import paramiko
 from config.config import data
-import PWAD
+from utils.pswd_ao_dict import passwords_dict
 
 _PASSWORDS_ = data["PASSWORD"]
 
@@ -215,7 +215,7 @@ def check_and_start_nginx_service(remote_host, ssh_username):
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(remote_host, username=ssh_username, password=password)
 
-            PWAD.passwords_dict[remote_host] = password
+            passwords_dict[remote_host] = password
 
             # Run the systemctl command to check the status of the nginx service
             cmd = "systemctl status nginx.service"
