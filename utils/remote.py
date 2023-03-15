@@ -174,7 +174,7 @@ def check_and_start_mysql_service(remote_host, ssh_username):
             else:
                 print("MySQL service is not running")
                 status = "not_running"
-                
+
                 # # If the service is not running, try to start it
                 # print("MySQL service is not running. Attempting to start...")
                 # cmd = "systemctl start mysql.service"
@@ -198,6 +198,57 @@ def check_and_start_mysql_service(remote_host, ssh_username):
         except paramiko.SSHException as e:
             print(
                 f"Unable to establish SSH connection with password: {e}")
+            status = "ssh_error"
+        except Exception as e:
+            print(f"An error occurred with password: {e}")
+            status = "unknown_error"
+
+    return status
+
+
+def check_and_start_nginx_service(remote_host, ssh_username):
+    for password in _PASSWORDS_:
+        try:
+            # Set up an SSH client and connect to the remote host
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(remote_host, username=ssh_username, password=password)
+
+            # Run the systemctl command to check the status of the nginx service
+            cmd = "systemctl status nginx.service"
+            stdin, stdout, stderr = ssh.exec_command(cmd)
+            output = stdout.read()
+
+            # Check the output for the service status
+            if b"Active: active" in output:
+                print("nginx service is running")
+                status = "running"
+            else:
+                print("nginx service is not running")
+                status = "not_running"
+                
+                # # If the service is not running, try to start it
+                # print("Attempting to start nginx service...")
+                # cmd = "systemctl start nginx.service"
+                # stdin, stdout, stderr = ssh.exec_command(cmd)
+                # output = stdout.read()
+
+                # # Check the output for errors
+                # if stderr:
+                #     print(f"Error starting nginx service: {stderr}")
+                #     status = "error"
+                # else:
+                #     print("nginx service started successfully")
+                #     status = "started"
+
+            # Close the SSH connection
+            ssh.close()
+            break  # Stop looping once a successful connection is established
+        except paramiko.AuthenticationException as e:
+            print(f"Authentication failed with password: {e}")
+            status = "auth_error"
+        except paramiko.SSHException as e:
+            print(f"Unable to establish SSH connection with password: {e}")
             status = "ssh_error"
         except Exception as e:
             print(f"An error occurred with password: {e}")

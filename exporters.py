@@ -86,4 +86,7 @@ def check_poc_system_services(ip_address: str, user_name: str, headers: dict) ->
     status = remote.check_and_start_mysql_service(ip_address, user_name)
     print(status)
 
+    status = remote.check_and_start_nginx_service(ip_address, user_name)
+    print(status)
+
     return True
