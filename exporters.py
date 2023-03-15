@@ -83,7 +83,7 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
 
 @decorators.check_if_host_is_reachable
 def check_poc_system_services(ip_address: str, user_name: str, headers: dict) -> bool:
-    status = remote.check_and_start_mysql_service(user_name, ip_address)
+    status = remote.check_and_start_mysql_service(ip_address, user_name)
     print(status)
 
     return True
