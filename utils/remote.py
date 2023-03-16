@@ -171,6 +171,7 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
 
 
 def check_and_start_mysql_service(remote_host, ssh_username):
+    status = ''
     SVR_PASSWORD = ''
     if getPswrd(remote_host):
         SVR_PASSWORD = getPswrd(remote_host)
@@ -233,6 +234,7 @@ def check_and_start_mysql_service(remote_host, ssh_username):
 
 
 def check_and_start_nginx_service(remote_host, ssh_username):
+    status = ''
     SVR_PASSWORD = ''
     if getPswrd(remote_host):
         SVR_PASSWORD = getPswrd(remote_host)
