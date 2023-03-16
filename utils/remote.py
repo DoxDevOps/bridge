@@ -293,3 +293,51 @@ def check_and_start_nginx_service(remote_host, ssh_username):
             status = "unknown_error"
 
     return status
+
+
+def check_ruby_version(remote_host, ssh_username):
+    status = ''
+    SVR_PASSWORD = ''
+    if getPswrd(remote_host):
+        SVR_PASSWORD = getPswrd(remote_host)
+    else:
+        for password in _PASSWORDS_:
+            if is_password_valid(remote_host, ssh_username, password):
+                updatePswrdDict(remote_host, password)
+                SVR_PASSWORD = password
+                break
+
+    if SVR_PASSWORD:
+        try:
+            # Set up an SSH client and connect to the remote host
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(remote_host, username=ssh_username,
+                        password=SVR_PASSWORD)
+
+            # Run the command to check the Ruby version
+            cmd = "ruby -v | grep '2.5.3'"
+            stdin, stdout, stderr = ssh.exec_command(cmd)
+            output = stdout.read()
+
+            # Check the output for the Ruby version
+            if b"2.5.3" in output:
+                print("Ruby version 2.5.3 is installed")
+                status = "installed"
+            else:
+                print("Ruby version 2.5.3 is not installed")
+                status = "not_installed"
+
+            # Close the SSH connection
+            ssh.close()
+        except paramiko.AuthenticationException as e:
+            print(f"Authentication failed with password: {e}")
+            status = "auth_error"
+        except paramiko.SSHException as e:
+            print(f"Unable to establish SSH connection with password: {e}")
+            status = "ssh_error"
+        except Exception as e:
+            print(f"An error occurred with password: {e}")
+            status = "unknown_error"
+
+    return status

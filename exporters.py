@@ -95,3 +95,11 @@ def check_poc_nginx_service(ip_address: str, user_name: str, headers: dict) -> b
     print(status)
 
     return True
+
+
+@decorators.check_if_host_is_reachable
+def check_poc_ruby_version(ip_address: str, user_name: str, headers: dict) -> bool:
+    status = remote.check_ruby_version(ip_address, user_name)
+    print(status)
+
+    return True
