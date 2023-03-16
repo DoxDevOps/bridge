@@ -49,13 +49,6 @@ def init():
         # # add the process to the list
         # processes.append(process_3)
 
-        # process_4 = Process(target=check_poc_nginx_service,
-        #                     args=(ip_address, user_name, headers, ))
-        # # start the process
-        # process_4.start()
-        # # add the process to the list
-        # processes.append(process_4)
-
         process_5 = Process(target=check_poc_ruby_version,
                             args=(ip_address, user_name, headers, ))
         # start the process
@@ -65,6 +58,19 @@ def init():
 
         # exports results of a ping of host
         # ping_exporter(ip_address, headers)
+
+    for host in hosts:
+
+        ip_address = host["fields"]["ip_address"]
+        user_name = host["fields"]["username"]
+        site_name = host["fields"]["name"]
+
+        process_4 = Process(target=check_poc_nginx_service,
+                            args=(ip_address, user_name, headers, ))
+        # start the process
+        process_4.start()
+        # add the process to the list
+        processes.append(process_4)
 
     # wait for all processes to finish
     for process in processes:
