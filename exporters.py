@@ -84,7 +84,16 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
 @decorators.check_if_host_is_reachable
 def check_poc_mysql_service(ip_address: str, user_name: str, headers: dict) -> bool:
     status = remote.check_and_start_mysql_service(ip_address, user_name)
-    print(status)
+
+    data = {
+        "ip_address": ip_address,
+        "service_name": "MySQL",
+        "status": status
+    }
+
+    if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
+
+        return False
 
     return True
 
@@ -92,7 +101,16 @@ def check_poc_mysql_service(ip_address: str, user_name: str, headers: dict) -> b
 @decorators.check_if_host_is_reachable
 def check_poc_nginx_service(ip_address: str, user_name: str, headers: dict) -> bool:
     status = remote.check_and_start_nginx_service(ip_address, user_name)
-    print(status)
+
+    data = {
+        "ip_address": ip_address,
+        "service_name": "Nginx",
+        "status": status
+    }
+
+    if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
+
+        return False
 
     return True
 
