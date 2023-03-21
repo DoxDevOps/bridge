@@ -1,4 +1,4 @@
-import asyncio
+from multiprocessing import Process
 import time
 import schedule
 from utils import imp_exp_func
@@ -8,53 +8,75 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-async def init():
+def init():
     hosts = imp_exp_func.get_data_from_api(os.getenv('IMPORTER_ENDPOINT'))
     headers = {'Content-type': 'application/json',
                'Accept': 'text/plain', 'Authorization': os.getenv('EXPORTER_KEY')}
     app_dirs = os.getenv('APP_DIRS').split(',')
+    # define a list to keep track of all processes
+    processes = []
 
-    # create a list of coroutines to run in parallel
-    coroutines = []
     for host in hosts:
+
         ip_address = host["fields"]["ip_address"]
         user_name = host["fields"]["username"]
         site_name = host["fields"]["name"]
 
-        # create a coroutine to export versions of apps on the host
-        coro_1 = get_versions(ip_address, user_name, app_dirs, headers)
-        coroutines.append(coro_1)
+        # create a new process instance
+        # exports versions of apps on the host
+        process_1 = Process(target=get_versions, args=(
+            ip_address, user_name, app_dirs, headers,))
+        # start the process
+        process_1.start()
+        # add the process to the list
+        processes.append(process_1)
 
-        # create a coroutine to export os details
-        coro_2 = get_host_details(ip_address, user_name, headers)
-        coroutines.append(coro_2)
+        # create a new process instance
+        # exports os details
+        process_2 = Process(target=get_host_details,
+                            args=(ip_address, user_name, headers,))
+        # start the process
+        process_2.start()
+        # add the process to the list
+        processes.append(process_2)
 
-        # create a coroutine to export sites system poc services
-        coro_3 = check_poc_mysql_service(ip_address, user_name, headers)
-        coroutines.append(coro_3)
+        # create a new process instance
+        # exports sites system poc services
+        process_3 = Process(target=check_poc_mysql_service,
+                            args=(ip_address, user_name, headers,))
+        # start the process
+        process_3.start()
+        # add the process to the list
+        processes.append(process_3)
 
-        coro_4 = check_poc_nginx_service(ip_address, user_name, headers)
-        coroutines.append(coro_4)
+        process_4 = Process(target=check_poc_nginx_service,
+                            args=(ip_address, user_name, headers, ))
+        # start the process
+        process_4.start()
+        # add the process to the list
+        processes.append(process_4)
 
-        coro_5 = check_poc_ruby_version(ip_address, user_name, headers)
-        coroutines.append(coro_5)
+        process_5 = Process(target=check_poc_ruby_version,
+                            args=(ip_address, user_name, headers, ))
+        # start the process
+        process_5.start()
+        # add the process to the list
+        processes.append(process_5)
 
-        # create a coroutine to export results of a ping of host
-        # coro_6 = ping_exporter(ip_address, headers)
-        # coroutines.append(coro_6)
+        # exports results of a ping of host
+        # ping_exporter(ip_address, headers)
 
-    # run all coroutines in parallel
-    await asyncio.gather(*coroutines)
+    # wait for all processes to finish
+    for process in processes:
+        process.join()
 
     return True
 
 
 if __name__ == '__main__':
     start_time = time.time()
-
-    asyncio.run(init())
-
-    end_time = time.time()
-    runtime = end_time - start_time
-    print("########################################################################################################")
-    print("Runtime: ", runtime, " seconds")
+    if init():
+        end_time = time.time()
+        runtime = end_time - start_time
+        print("########################################################################################################")
+        print("Runtime: ", runtime, " seconds")
