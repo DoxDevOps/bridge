@@ -1,11 +1,11 @@
-from curses import echo
-import re
-from fabric import Connection
-import paramiko
-from config.config import data
 from utils.net import updatePswrdDict, getPswrd, is_password_valid
+import re
+import paramiko
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-_PASSWORDS_ = data["PASSWORD"]
+_PASSWORDS_ = os.getenv('PASSWORDS')
 
 
 def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
