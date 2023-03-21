@@ -5,14 +5,14 @@ load_dotenv()
 
 
 @decorators.check_if_host_is_reachable
-async def get_versions(ip_address: str, user_name: str, app_dirs: list, headers: dict) -> bool:
+def get_versions(ip_address: str, user_name: str, app_dirs: list, headers: dict) -> bool:
 
     for app_dir in app_dirs:
 
         print(
             f"*** Starting to export version details for {app_dir} for host {ip_address}")
 
-        details = await remote.get_app_version(user_name, ip_address, app_dir)
+        details = remote.get_app_version(user_name, ip_address, app_dir)
 
         if type(details) == list:
 
@@ -20,13 +20,13 @@ async def get_versions(ip_address: str, user_name: str, app_dirs: list, headers:
                            "app_dir": app_dir, "version": details[0]}
 
             try:
-                await imp_exp_func.send_data(
+                imp_exp_func.send_data(
                     os.getenv('EXPORTER_ENDPOINT'), app_version, headers)
             except Exception as e:
                 print("eeror: ", e)
 
 
-async def ping_exporter(ip_address: str, headers: dict) -> bool:
+def ping_exporter(ip_address: str, headers: dict) -> bool:
 
     status = "up"
 
@@ -36,7 +36,7 @@ async def ping_exporter(ip_address: str, headers: dict) -> bool:
 
     uptime = {"ip_address": ip_address, "status": status}
 
-    if not await imp_exp_func.send_data(os.getenv('PING_EXPORTER_ENDPOINT'), uptime, headers):
+    if not imp_exp_func.send_data(os.getenv('PING_EXPORTER_ENDPOINT'), uptime, headers):
 
         return False
 
@@ -44,12 +44,12 @@ async def ping_exporter(ip_address: str, headers: dict) -> bool:
 
 
 @decorators.check_if_host_is_reachable
-async def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
+def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
 
     print(
         f"*** Starting to export host system details for host {ip_address}")
 
-    details = await remote.get_host_system_details(user_name, ip_address)
+    details = remote.get_host_system_details(user_name, ip_address)
 
     if type(details) == list:
 
@@ -74,7 +74,7 @@ async def get_host_details(ip_address: str, user_name: str, headers: dict) -> bo
 
         print(host_details)
 
-        if not await imp_exp_func.send_data(os.getenv('SYSTEM_UTI_ENDPOINT'), host_details, headers):
+        if not imp_exp_func.send_data(os.getenv('SYSTEM_UTI_ENDPOINT'), host_details, headers):
 
             return False
 
@@ -82,15 +82,15 @@ async def get_host_details(ip_address: str, user_name: str, headers: dict) -> bo
 
 
 @decorators.check_if_host_is_reachable
-async def check_poc_mysql_service(ip_address: str, user_name: str, headers: dict) -> bool:
-    status = await remote.check_and_start_mysql_service(ip_address, user_name)
+def check_poc_mysql_service(ip_address: str, user_name: str, headers: dict) -> bool:
+    status = remote.check_and_start_mysql_service(ip_address, user_name)
 
     data = {"ip_address": ip_address,
             "service_name": "MySQL",
             "status": status
             }
 
-    if not await imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
+    if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
 
         return False
 
@@ -98,16 +98,16 @@ async def check_poc_mysql_service(ip_address: str, user_name: str, headers: dict
 
 
 @decorators.check_if_host_is_reachable
-async def check_poc_nginx_service(ip_address: str, user_name: str, headers: dict) -> bool:
+def check_poc_nginx_service(ip_address: str, user_name: str, headers: dict) -> bool:
     status = remote.check_and_start_nginx_service(ip_address, user_name)
 
     data = {
-            "ip_address": ip_address,
-            "service_name": "Nginx",
-            "status": status
-            }
+        "ip_address": ip_address,
+        "service_name": "Nginx",
+        "status": status
+    }
 
-    if not await imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
+    if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
 
         return False
 
@@ -115,7 +115,7 @@ async def check_poc_nginx_service(ip_address: str, user_name: str, headers: dict
 
 
 @decorators.check_if_host_is_reachable
-async def check_poc_ruby_version(ip_address: str, user_name: str, headers: dict) -> bool:
+def check_poc_ruby_version(ip_address: str, user_name: str, headers: dict) -> bool:
     status = remote.check_ruby_version(ip_address, user_name)
     print(status)
 
