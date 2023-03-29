@@ -34,12 +34,13 @@ def updatePswrdDict(key, value):
 
 def getPswrd(ip_address):
     # get the value for the given key, or return False if the key is not in Redis
-    value = r.get(ip_address)
+    # value = r.get(ip_address)
 
-    if value is None:
-        return False
-    else:
-        return value.decode('utf-8')
+    # if value is None:
+    #     return False
+    # else:
+    #     return value.decode('utf-8')
+    return False
 
 
 def is_password_valid(host, username, password):
