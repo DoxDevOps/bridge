@@ -30,7 +30,8 @@ r = redis.Redis(host='localhost', port=6379, db=0)
 
 def updatePswrdDict(key, value):
     # update or insert a key-value pair
-    r.set(key, value)
+    # r.set(key, value)
+    True
 
 def getPswrd(ip_address):
     # get the value for the given key, or return False if the key is not in Redis
