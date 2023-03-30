@@ -32,6 +32,7 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
         count = 0
 
         for each_password in _PASSWORDS_:
+            print("PASSWORD: " + each_password)
             try:
                 ssh.connect(ip_address, username=user_name,
                             password=each_password)
