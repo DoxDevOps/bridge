@@ -82,8 +82,45 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
 
 
 @decorators.check_if_host_is_reachable
-def check_poc_system_services(ip_address: str, user_name: str, headers: dict) -> bool:
-    status = remote.check_and_start_mysql_service(user_name, ip_address)
+def check_poc_mysql_service(ip_address: str, user_name: str, headers: dict) -> bool:
+    status = remote.check_and_start_system_service(
+        ip_address, user_name, "mysql.service")
+
+    if status:
+        data = {"ip_address": ip_address,
+                "service_name": "MySQL",
+                "status": status
+                }
+
+        if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
+
+            return False
+
+    return True
+
+
+@decorators.check_if_host_is_reachable
+def check_poc_nginx_service(ip_address: str, user_name: str, headers: dict) -> bool:
+    status = remote.check_and_start_system_service(
+        ip_address, user_name, "nginx.service")
+
+    if status:
+        data = {
+            "ip_address": ip_address,
+            "service_name": "Nginx",
+            "status": status
+        }
+
+        if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
+
+            return False
+
+    return True
+
+
+@decorators.check_if_host_is_reachable
+def check_poc_ruby_version(ip_address: str, user_name: str, headers: dict) -> bool:
+    status = remote.check_ruby_version(ip_address, user_name)
     print(status)
 
     return True

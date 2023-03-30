@@ -1,10 +1,11 @@
 from curses import echo
 import re
-from fabric import Connection
 import paramiko
-from config.config import data
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-_PASSWORDS_ = data["PASSWORD"]
+_PASSWORDS_ = os.getenv('PASSWORDS')
 
 
 def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
@@ -154,7 +155,8 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         return "failed_to_get_host_system_details"
 
 
-def check_and_start_mysql_service(remote_host, ssh_username):
+def check_and_start_system_service(remote_host, ssh_username, service_name):
+    status = ""
     for password in _PASSWORDS_:
         try:
             # Set up a SSH client and connect to the remote host
@@ -163,41 +165,62 @@ def check_and_start_mysql_service(remote_host, ssh_username):
             ssh.connect(remote_host, username=ssh_username, password=password)
 
             # Run the systemctl command to check the status of the MySQL service
-            cmd = "systemctl status mysql.service"
+            cmd = "systemctl status "+service_name
             stdin, stdout, stderr = ssh.exec_command(cmd)
             output = stdout.read()
 
             # Check the output for the service status
             if b"Active: active" in output:
-                print("MySQL service is running")
+                print(f" '{service_name}' is running")
                 status = "running"
             else:
-                # If the service is not running, try to start it
-                print("MySQL service is not running. Attempting to start...")
-                cmd = "systemctl start mysql.service"
-                stdin, stdout, stderr = ssh.exec_command(cmd)
-                output = stdout.read()
-
-                # Check the output for errors
-                if stderr:
-                    print(f"Error starting MySQL service: {stderr}")
-                    status = "error"
-                else:
-                    print("MySQL service started successfully")
-                    status = "started"
+                print(f" '{service_name}' is not running")
+                status = "not_running"
 
             # Close the SSH connection
             ssh.close()
             break  # Stop looping once a successful connection is established
         except paramiko.AuthenticationException as e:
             print(f"Authentication failed with password '{password}': {e}")
-            status = "auth_error"
         except paramiko.SSHException as e:
             print(
                 f"Unable to establish SSH connection with password '{password}': {e}")
-            status = "ssh_error"
         except Exception as e:
             print(f"An error occurred with password '{password}': {e}")
-            status = "unknown_error"
 
     return status
+
+def check_ruby_version(remote_host, ssh_username):
+    status = ""
+    for password in _PASSWORDS_:
+        try:
+            # Set up an SSH client and connect to the remote host
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(remote_host, username=ssh_username,
+                        password=password)
+
+            # Run the command to check the Ruby version
+            cmd = "ruby -v | grep '2.5.3'"
+            stdin, stdout, stderr = ssh.exec_command(cmd)
+            output = stdout.read()
+
+            # Check the output for the Ruby version
+            if b"2.5.3" in output:
+                print("Ruby version 2.5.3 is installed")
+                status = "installed"
+            else:
+                print("Ruby version 2.5.3 is not installed")
+                status = "not_installed"
+
+            # Close the SSH connection
+            ssh.close()
+        except paramiko.AuthenticationException as e:
+            print(f"Authentication failed with password: {e}")
+        except paramiko.SSHException as e:
+            print(f"Unable to establish SSH connection with password: {e}")
+        except Exception as e:
+            print(f"An error occurred with password: {e}")
+
+    return status
+
