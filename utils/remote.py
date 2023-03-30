@@ -187,12 +187,12 @@ def check_and_start_system_service(remote_host, ssh_username, service_name):
             ssh.close()
             break  # Stop looping once a successful connection is established
         except paramiko.AuthenticationException as e:
-            print(f"Authentication failed with password '{password}': {e}")
+            print(f"Authentication failed with password: {e}")
         except paramiko.SSHException as e:
             print(
-                f"Unable to establish SSH connection with password '{password}': {e}")
+                f"Unable to establish SSH connection with password: {e}")
         except Exception as e:
-            print(f"An error occurred with password '{password}': {e}")
+            print(f"An error occurred with password: {e}")
 
     return status
 
