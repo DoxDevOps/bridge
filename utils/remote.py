@@ -1,13 +1,16 @@
 from curses import echo
 import re
-from fabric import connection
 import paramiko
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
 _PASSWORDS_ = os.getenv('PASSWORDS')
-password_list = _PASSWORDS_.split(',')
+passwords = _PASSWORDS_.split(',')
+# Step 1: Remove unwanted characters (square brackets and single quotes) from the passwords
+password_list = [password.strip("['").strip("']") for password in passwords]
+password_list = [password.replace("'", "").strip("")
+                 for password in password_list]
 
 
 def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
@@ -36,7 +39,7 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
         for each_password in password_list:
             try:
                 ssh.connect(ip_address, username=user_name,
-                            password=each_password)
+                            password=each_password.strip())
                 stdin, stdout, stderr = ssh.exec_command(
                     f"cd {app_dir} && git describe")
                 result = stdout.read().splitlines()
@@ -54,7 +57,7 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
                 if count == len(password_list):
                     # Write failed IP addresses to a file
                     with open("failed_ips.txt", "a") as f:
-                        f.write(ip_address + "\n")
+                        f.write(user_name + " "+ip_address + "\n")
 
     except Exception as e:
         print(
@@ -96,7 +99,7 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         for each_password in password_list:
             try:
                 ssh.connect(ip_address, username=user_name,
-                            password=each_password)
+                            password=each_password.strip())
                 # Linux command for system version inf
                 stdin, stdout, stderr = ssh.exec_command("cat /etc/os-release")
                 # Output command execution results
@@ -164,7 +167,8 @@ def check_and_start_system_service(remote_host, ssh_username, service_name):
             # Set up a SSH client and connect to the remote host
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(remote_host, username=ssh_username, password=password)
+            ssh.connect(remote_host, username=ssh_username,
+                        password=password.strip())
 
             # Run the systemctl command to check the status of the MySQL service
             cmd = "systemctl status "+service_name
@@ -201,7 +205,7 @@ def check_ruby_version(remote_host, ssh_username):
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(remote_host, username=ssh_username,
-                        password=password)
+                        password=password.strip())
 
             # Run the command to check the Ruby version
             cmd = "ruby -v | grep '2.5.3'"

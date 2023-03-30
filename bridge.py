@@ -40,23 +40,23 @@ def init():
         # add the process to the list
         processes.append(process_2)
 
-        # # create a new process instance
-        # # exports sites system poc services
-        # process_3 = Process(target=check_poc_mysql_service,
-        #                     args=(ip_address, user_name, headers,))
-        # # start the process
-        # process_3.start()
-        # # add the process to the list
-        # processes.append(process_3)
+        # create a new process instance
+        # exports sites system poc services
+        process_3 = Process(target=check_poc_mysql_service,
+                            args=(ip_address, user_name, headers,))
+        # start the process
+        process_3.start()
+        # add the process to the list
+        processes.append(process_3)
 
-        # # create a new process instance
-        # # exports status for system service
-        # process_4 = Process(target=check_poc_nginx_service,
-        #                     args=(ip_address, user_name, headers,))
-        # # start the process
-        # process_4.start()
-        # # add the process to the list
-        # processes.append(process_4)
+        # create a new process instance
+        # exports status for system service
+        process_4 = Process(target=check_poc_nginx_service,
+                            args=(ip_address, user_name, headers,))
+        # start the process
+        process_4.start()
+        # add the process to the list
+        processes.append(process_4)
 
         # exports results of a ping of host
         # ping_exporter(ip_address, headers)
