@@ -1,5 +1,6 @@
 from curses import echo
 import re
+from fabric import connection
 import paramiko
 import os
 from dotenv import load_dotenv
@@ -191,6 +192,7 @@ def check_and_start_system_service(remote_host, ssh_username, service_name):
 
     return status
 
+
 def check_ruby_version(remote_host, ssh_username):
     status = ""
     for password in password_list:
@@ -224,4 +226,3 @@ def check_ruby_version(remote_host, ssh_username):
             print(f"An error occurred with password: {e}")
 
     return status
-
