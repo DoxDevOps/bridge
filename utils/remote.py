@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 _PASSWORDS_ = os.getenv('PASSWORDS')
+password_list = _PASSWORDS_.split(',')
 
 
 def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
@@ -31,7 +32,7 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
         # tracker
         count = 0
 
-        for each_password in _PASSWORDS_:
+        for each_password in password_list:
             print("PASSWORD: " + each_password)
             try:
                 ssh.connect(ip_address, username=user_name,
@@ -50,7 +51,7 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
             except Exception as e:
                 print("An error occured: ", e)
                 count += 1
-                if count == len(_PASSWORDS_):
+                if count == len(password_list):
                     # Write failed IP addresses to a file
                     with open("failed_ips.txt", "a") as f:
                         f.write(ip_address + "\n")
@@ -92,7 +93,7 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         # a private key will be used soon
         # AUTO SSH IS NEEDED ON THIS
 
-        for each_password in _PASSWORDS_:
+        for each_password in password_list:
             try:
                 ssh.connect(ip_address, username=user_name,
                             password=each_password)
@@ -158,7 +159,7 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
 
 def check_and_start_system_service(remote_host, ssh_username, service_name):
     status = ""
-    for password in _PASSWORDS_:
+    for password in password_list:
         try:
             # Set up a SSH client and connect to the remote host
             ssh = paramiko.SSHClient()
@@ -193,7 +194,7 @@ def check_and_start_system_service(remote_host, ssh_username, service_name):
 
 def check_ruby_version(remote_host, ssh_username):
     status = ""
-    for password in _PASSWORDS_:
+    for password in password_list:
         try:
             # Set up an SSH client and connect to the remote host
             ssh = paramiko.SSHClient()
