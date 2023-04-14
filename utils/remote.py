@@ -13,13 +13,14 @@ password_list = [password.replace("'", "").strip("")
                  for password in password_list]
 
 
-def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
+def get_app_version(user_name: str, ip_address: str, app_dir: str, facility_name: str) -> str:
     """gets version of an application running on remote server
 
     Args:
         user_name (str): remote user name
         ip_address (str): ip address of remote server
         app_dir (str): directory of application
+        facility_name: name of facility
 
     Returns:
         str: version of application on remote server
@@ -57,7 +58,7 @@ def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
                 if count == len(password_list):
                     # Write failed IP addresses to a file
                     with open("failed_ips.txt", "a") as f:
-                        f.write(user_name + " "+ip_address + "\n")
+                        f.write(facility_name + " "+ip_address + "\n")
 
     except Exception as e:
         print(
