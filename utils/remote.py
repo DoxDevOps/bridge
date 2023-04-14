@@ -13,7 +13,7 @@ password_list = [password.replace("'", "").strip("")
                  for password in password_list]
 
 
-def get_app_version(user_name: str, ip_address: str, app_dir: str, facility_name: str) -> str:
+def get_app_version(user_name: str, ip_address: str, facility_name: str, app_dir: str) -> str:
     """gets version of an application running on remote server
 
     Args:

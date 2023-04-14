@@ -25,7 +25,7 @@ def init():
         # create a new process instance
         # exports versions of apps on the host
         process_1 = Process(target=get_versions, args=(
-            ip_address, user_name, app_dirs, headers,))
+            ip_address, user_name, site_name, app_dirs, headers,))
         # start the process
         process_1.start()
         # add the process to the list
