@@ -1,9 +1,8 @@
 from multiprocessing import Process
 import time
 import schedule
-from utils import imp_exp_func
+from utils import imp_exp_func, net
 from exporters import get_host_details, get_versions, ping_exporter, check_poc_mysql_service, check_poc_nginx_service
-from .utils import net
 import os
 from dotenv import load_dotenv
 load_dotenv()
