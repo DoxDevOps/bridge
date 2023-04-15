@@ -57,7 +57,7 @@ def get_app_version(user_name: str, ip_address: str, facility_name: str, app_dir
                 count += 1
                 if count == len(password_list):
                     # Write failed IP addresses to a file
-                    with open("failed_ips.txt", "a") as f:
+                    with open("failed_ssh_ips.txt", "a") as f:
                         f.write(facility_name + " "+ip_address + "\n")
 
     except Exception as e:
