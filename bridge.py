@@ -1,5 +1,6 @@
 from multiprocessing import Process
 import time
+from time import sleep
 import schedule
 from utils import imp_exp_func, net
 from exporters import get_host_details, get_versions, ping_exporter, check_poc_mysql_service, check_poc_nginx_service
@@ -15,6 +16,7 @@ def init():
     app_dirs = os.getenv('APP_DIRS').split(',')
     # define a list to keep track of all processes
     processes = []
+    count = 0
 
     for host in hosts:
 
@@ -65,6 +67,9 @@ def init():
 
         # exports results of a ping of host
         # ping_exporter(ip_address, headers)
+        if (count) % 40 == 0:
+            sleep(30)
+        count += 1
 
     # wait for all processes to finish
     for process in processes:
