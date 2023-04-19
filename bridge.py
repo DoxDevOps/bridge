@@ -65,9 +65,10 @@ def init():
     app_dirs = os.getenv('APP_DIRS').split(',')
     # define a list to keep track of all processes
     processes = []
+    i = 0
+    max_items_per_batch = 10
 
     for host in hosts:
-
         ip_address = host["fields"]["ip_address"]
         user_name = host["fields"]["username"]
         site_name = host["fields"]["name"]
@@ -78,7 +79,15 @@ def init():
         process_1.start()
         # add the process to the list
         processes.append(process_1)
-        # wait for all processes to finish
+
+        i += 1
+        # wait for all processes to finish after processing a batch of 10 items
+        if i % max_items_per_batch == 0:
+            for process in processes:
+                process.join()
+            processes = []
+
+    # wait for all remaining processes to finish
     for process in processes:
         process.join()
 
