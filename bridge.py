@@ -1,5 +1,6 @@
 from multiprocessing import Process
 import time
+from time import sleep
 import schedule
 from utils import imp_exp_func, net
 from exporters import get_host_details, get_versions, ping_exporter, check_poc_mysql_service, check_poc_nginx_service
@@ -66,7 +67,7 @@ def init():
     # define a list to keep track of all processes
     processes = []
 
-    for host in hosts:
+    for i, host in enumerate(hosts):
 
         ip_address = host["fields"]["ip_address"]
         user_name = host["fields"]["username"]
@@ -78,7 +79,12 @@ def init():
         process_m.start()
         # add the process to the list
         processes.append(process_m)
-        # wait for all processes to finish
+        
+        # wait for 13 seconds after the 10th host
+        if (i + 1) % 10 == 0:
+            sleep(13)
+        
+    # wait for all processes to finish
     for process in processes:
         process.join()
 
