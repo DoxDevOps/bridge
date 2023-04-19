@@ -67,7 +67,7 @@ def init():
 
         # exports results of a ping of host
         # ping_exporter(ip_address, headers)
-        if (count) % 40 == 0:
+        if (count) % 30 == 0:
             sleep(30)
         count += 1
 
