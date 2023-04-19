@@ -68,7 +68,7 @@ def init():
         # exports results of a ping of host
         # ping_exporter(ip_address, headers)
         if (count) % 30 == 0:
-            sleep(30)
+            sleep(40)
         count += 1
 
     # wait for all processes to finish
