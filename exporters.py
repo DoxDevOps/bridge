@@ -129,9 +129,9 @@ def check_poc_mysql_service(ip_address: str, user_name: str, headers: dict) -> b
         
         print(data)
 
-        # if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
+        if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
 
-        #     return False
+            return False
 
     return True
 
