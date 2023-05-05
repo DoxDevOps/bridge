@@ -15,8 +15,7 @@ password_list = [password.strip("['").strip("']") for password in passwords]
 password_list = [password.replace("'", "").strip("")
                  for password in password_list]
 
-
-def get_app_version(user_name: str, ip_address: str, facility_name: str, app_dir: str) -> str:
+async def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
     """gets version of an application running on remote server
 
     Args:
@@ -29,40 +28,21 @@ def get_app_version(user_name: str, ip_address: str, facility_name: str, app_dir
         str: version of application on remote server
     """
     try:
-        ssh = paramiko.SSHClient()
-        # ssh.load_host_keys('/home/username/.ssh/known_hosts')
-        # ssh.load_system_host_keys()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        # Establish a connection with a hard coded pasword
-        # a private key will be used soon
-        # AUTO SSH IS NEEDED ON THIS
-
-        # tracker
-        count = 0
-
-        for each_password in password_list:
+        client = await check_if_password_works(ip_address, user_name)
+        if isinstance(client,AsyncParamikoSSHClient):
             try:
-                ssh.connect(ip_address, username=user_name,
-                            password=each_password.strip())
-                stdin, stdout, stderr = ssh.exec_command(
-                    f"cd {app_dir} && git describe")
-                result = stdout.read().splitlines()
+                await client.clsConnect()
+                cmd = f"cd {app_dir} && git describe"
+                stdout = await client.send_command(cmd)
+                client.close()
+                result = stdout.splitlines()
                 version = f"{result[0]}".split("'")[1]
-
-                # Close the connection
-                ssh.close()
 
                 collection = [version]
                 return collection
 
             except Exception as e:
                 print("An error occured: ", e)
-                count += 1
-                if count == len(password_list):
-                    # Write failed IP addresses to a file
-                    with open("failed_ssh_ips.txt", "a") as f:
-                        print("cound been a file")
-                        # f.write(facility_name + " "+ip_address + "\n")
 
     except Exception as e:
         print(
@@ -70,7 +50,7 @@ def get_app_version(user_name: str, ip_address: str, facility_name: str, app_dir
         return "failed_to_get_version"
 
 
-def get_host_system_details(user_name: str, ip_address: str) -> str:
+async def get_host_system_details(user_name: str, ip_address: str) -> str:
     """gets version of operating system running on remote host
        gets storage stats of remote host
        gets ram stats of remote host
@@ -93,42 +73,40 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
             ]
     """
     try:
-        ssh = paramiko.SSHClient()
-        # ssh.load_host_keys('/home/username/.ssh/known_hosts')
-        # ssh.load_system_host_keys()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        # Establish a connection with a hard coded pasword
-        # a private key will be used soon
-        # AUTO SSH IS NEEDED ON THIS
-
-        for each_password in password_list:
+        client = await check_if_password_works(ip_address, user_name)
+        if isinstance(client,AsyncParamikoSSHClient):
             try:
-                ssh.connect(ip_address, username=user_name,
-                            password=each_password.strip())
+                await client.clsConnect()
                 # Linux command for system version inf
-                stdin, stdout, stderr = ssh.exec_command("cat /etc/os-release")
+                cmd = "cat /etc/os-release"
+                output = await client.send_command(cmd)
+                client.close()
                 # Output command execution results
-                result = stdout.read().splitlines()
+                result = output.splitlines()
                 # string of both os name and version
                 inputstring = f"{result[0]} {result[1]}"
                 # array of both os anme and version
                 collection = re.findall('"([^"]*)"', inputstring)
 
+                await client.clsConnect()
                 # Linux command for cpu utilazation command
                 get_cpu_uti_cmd = "top -bn2 | grep '%Cpu' | tail -1 | grep -P '(....|...) id,'|awk '{print  100-$8 }'"
                 # executing command for writing to stdout
-                stdin, stdout, stderr = ssh.exec_command(get_cpu_uti_cmd)
+                stdout  = await client.send_command(get_cpu_uti_cmd)
+                client.close()
                 # getting value for cpu utilzation
-                cpu_utilization = stdout.read().splitlines()[0]
+                cpu_utilization = stdout.splitlines()[0]
                 cpu_utilization = f"{cpu_utilization}"
                 collection.append(cpu_utilization.split("'")[1])
 
+                await client.clsConnect()
                 # Linux command for HDD utilazation command
                 get_hdd_uti_cmd = "df -h -t ext4"
                 # executing command for writing to stdout
-                stdin, stdout, stderr = ssh.exec_command(get_hdd_uti_cmd)
+                stdout = await client.send_command(get_hdd_uti_cmd)
+                client.close()
                 # getting values for hdd utilaztion
-                hdd_utilazation = stdout.read().splitlines()[1]
+                hdd_utilazation = stdout.splitlines()[1]
                 hdd_utilazation = f"{hdd_utilazation}".split()
                 # total_storage
                 collection.append(hdd_utilazation[1])
@@ -139,12 +117,14 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
                 # remaining_storage_percentile
                 collection.append(hdd_utilazation[4])
 
+                await client.clsConnect()
                 # Linux command for RAM utilazation command
                 get_ram_uti_cmd = "free -h"
                 # executing command for writing to stdout
-                stdin, stdout, stderr = ssh.exec_command(get_ram_uti_cmd)
+                stdout = await client.send_command(get_ram_uti_cmd)
+                client.close()
                 # getting values for hdd utilaztion
-                ram_utilazation = stdout.read().splitlines()[1]
+                ram_utilazation = stdout.splitlines()[1]
                 ram_utilazation = f"{ram_utilazation}".split()
                 # total_ram
                 collection.append(ram_utilazation[1])
@@ -153,8 +133,6 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
                 # remaining_ram
                 collection.append(ram_utilazation[6])
 
-                # Close the connection
-                ssh.close()
                 return collection
             except Exception as e:
                 print("An error occured: ", e)
@@ -163,79 +141,6 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         print(
             f"--- Failed to get host system details for {ip_address} with exception: {e} ---")
         return "failed_to_get_host_system_details"
-
-
-def check_and_start_system_service(remote_host, ssh_username, service_name):
-    status = ""
-    for password in password_list:
-        try:
-            # Set up a SSH client and connect to the remote host
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(remote_host, username=ssh_username,
-                        password=password.strip())
-
-            # Run the systemctl command to check the status of the MySQL service
-            cmd = "systemctl status "+service_name
-            stdin, stdout, stderr = ssh.exec_command(cmd)
-            output = stdout.read()
-
-            # Check the output for the service status
-            if b"Active: active" in output:
-                print(f" '{service_name}' is running")
-                status = "running"
-            else:
-                print(f" '{service_name}' is not running")
-                status = "not_running"
-
-            # Close the SSH connection
-            ssh.close()
-            break  # Stop looping once a successful connection is established
-        except paramiko.AuthenticationException as e:
-            print(f"Authentication failed with password: {e}")
-        except paramiko.SSHException as e:
-            print(
-                f"Unable to establish SSH connection with password: {e}")
-        except Exception as e:
-            print(f"An error occurred with password: {e}")
-
-    return status
-
-
-def check_ruby_version(remote_host, ssh_username):
-    status = ""
-    for password in password_list:
-        try:
-            # Set up an SSH client and connect to the remote host
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(remote_host, username=ssh_username,
-                        password=password.strip())
-
-            # Run the command to check the Ruby version
-            cmd = "ruby -v | grep '2.5.3'"
-            stdin, stdout, stderr = ssh.exec_command(cmd)
-            output = stdout.read()
-
-            # Check the output for the Ruby version
-            if b"2.5.3" in output:
-                print("Ruby version 2.5.3 is installed")
-                status = "installed"
-            else:
-                print("Ruby version 2.5.3 is not installed")
-                status = "not_installed"
-
-            # Close the SSH connection
-            ssh.close()
-        except paramiko.AuthenticationException as e:
-            print(f"Authentication failed with password: {e}")
-        except paramiko.SSHException as e:
-            print(f"Unable to establish SSH connection with password: {e}")
-        except Exception as e:
-            print(f"An error occurred with password: {e}")
-
-    return status
-
 
 async def check_ruby_version2(remote_host, ssh_username):
     status = ""
@@ -246,6 +151,7 @@ async def check_ruby_version2(remote_host, ssh_username):
             # Run the command to check the Ruby version
             cmd = "ruby -v | grep '2.5.3'"
             output = await client.send_command(cmd)
+            client.close()
 
             # Check the output for the Ruby version
             if b"2.5.3" in output:
@@ -269,6 +175,7 @@ async def check_and_start_system_service2(remote_host, ssh_username, service_nam
             # Run the systemctl command to check the status of the MySQL service
             cmd = "systemctl status "+service_name
             output = await client.send_command(cmd)
+            client.close()
 
             # Check the output for the service status
             if b"Active: active" in output:

@@ -6,14 +6,15 @@ load_dotenv()
 
 
 @decorators.check_if_host_is_reachable
-def get_versions(ip_address: str, user_name: str, facility_name: str, app_dirs: list, headers: dict) -> bool:
+def get_versions(ip_address: str, user_name: str, app_dirs: list, headers: dict) -> bool:
 
     for app_dir in app_dirs:
 
         print(
             f"*** Starting to export version details for {app_dir} for host {ip_address}")
 
-        details = remote.get_app_version(user_name, ip_address, facility_name, app_dir)
+        details = asyncio.run(remote.get_app_version(
+            user_name, ip_address, app_dir))
 
         if type(details) == list:
 
@@ -50,7 +51,7 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
     print(
         f"*** Starting to export host system details for host {ip_address}")
 
-    details = remote.get_host_system_details(user_name, ip_address)
+    details = asyncio.run(remote.get_host_system_details(user_name, ip_address))
 
     if type(details) == list:
 
@@ -83,27 +84,9 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
 
 
 @decorators.check_if_host_is_reachable
-def check_poc_mysql_service(ip_address: str, user_name: str, headers: dict) -> bool:
-    status = remote.check_and_start_system_service(
-        ip_address, user_name, "mysql.service")
-
-    if status:
-        data = {"ip_address": ip_address,
-                "service_name": "MySQL",
-                "status": status
-                }
-
-        if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
-
-            return False
-
-    return True
-
-
-@decorators.check_if_host_is_reachable
 def check_poc_nginx_service(ip_address: str, user_name: str, headers: dict) -> bool:
-    status = remote.check_and_start_system_service(
-        ip_address, user_name, "nginx.service")
+    status =  asyncio.run(remote.check_and_start_system_service2(
+        ip_address, user_name, "nginx.service"))
 
     if status:
         data = {
@@ -127,15 +110,14 @@ def check_poc_ruby_version(ip_address: str, user_name: str, headers: dict) -> bo
     return True
 
 @decorators.check_if_host_is_reachable
-def check_poc_ruby_version2(ip_address: str, user_name: str, headers: dict) -> bool:
+def check_poc_ruby_version(ip_address: str, user_name: str, headers: dict) -> bool:
     status = asyncio.run(remote.check_ruby_version2(ip_address, user_name))
-    print("#######################################")
     print(status)
 
     return True
 
 @decorators.check_if_host_is_reachable
-def check_poc_mysql_service2(ip_address: str, user_name: str, headers: dict) -> bool:
+def check_poc_mysql_service(ip_address: str, user_name: str, headers: dict) -> bool:
     status = asyncio.run(remote.check_and_start_system_service2(
         ip_address, user_name, "mysql.service"))
 
