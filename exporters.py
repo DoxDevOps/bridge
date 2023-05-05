@@ -1,6 +1,7 @@
 from utils import imp_exp_func, remote, decorators, net
 import os
 from dotenv import load_dotenv
+import asyncio
 load_dotenv()
 
 
@@ -124,3 +125,38 @@ def check_poc_ruby_version(ip_address: str, user_name: str, headers: dict) -> bo
     print(status)
 
     return True
+
+@decorators.check_if_host_is_reachable
+def check_poc_ruby_version2(ip_address: str, user_name: str, headers: dict) -> bool:
+    status = asyncio.run(remote.check_ruby_version2(ip_address, user_name))
+    print("#######################################")
+    print(status)
+
+    return True
+
+@decorators.check_if_host_is_reachable
+def check_poc_mysql_service2(ip_address: str, user_name: str, headers: dict) -> bool:
+    status = asyncio.run(remote.check_and_start_system_service2(
+        ip_address, user_name, "mysql.service"))
+
+    if status:
+        data = {"ip_address": ip_address,
+                "service_name": "MySQL",
+                "status": status
+                }
+        
+        print(data)
+
+        # if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
+
+        #     return False
+
+    return True
+
+# @decorators.check_if_host_is_reachable
+# def dropListFunctions(ip_address: str, user_name: str, headers: dict) -> bool:
+#     print("dropListFunctions")
+#     check_poc_mysql_service2(ip_address, user_name, headers)
+#     check_poc_ruby_version2(ip_address, user_name, headers)
+#     return True
+

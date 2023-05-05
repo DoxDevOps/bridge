@@ -2,11 +2,14 @@ from curses import echo
 import re
 import paramiko
 import os
+import asyncio
+from .net import AsyncParamikoSSHClient, RedisCls
 from dotenv import load_dotenv
 load_dotenv()
 
 _PASSWORDS_ = os.getenv('PASSWORDS')
 passwords = _PASSWORDS_.split(',')
+
 # Step 1: Remove unwanted characters (square brackets and single quotes) from the passwords
 password_list = [password.strip("['").strip("']") for password in passwords]
 password_list = [password.replace("'", "").strip("")
@@ -58,7 +61,8 @@ def get_app_version(user_name: str, ip_address: str, facility_name: str, app_dir
                 if count == len(password_list):
                     # Write failed IP addresses to a file
                     with open("failed_ssh_ips.txt", "a") as f:
-                        f.write(facility_name + " "+ip_address + "\n")
+                        print("cound been a file")
+                        # f.write(facility_name + " "+ip_address + "\n")
 
     except Exception as e:
         print(
@@ -231,3 +235,74 @@ def check_ruby_version(remote_host, ssh_username):
             print(f"An error occurred with password: {e}")
 
     return status
+
+
+async def check_ruby_version2(remote_host, ssh_username):
+    status = ""
+    client = await check_if_password_works(remote_host, ssh_username)
+    if isinstance(client,AsyncParamikoSSHClient):
+        try:
+            await client.clsConnect()
+            # Run the command to check the Ruby version
+            cmd = "ruby -v | grep '2.5.3'"
+            output = await client.send_command(cmd)
+
+            # Check the output for the Ruby version
+            if b"2.5.3" in output:
+                print("Ruby version 2.5.3 is installed")
+                status = "installed"
+            else:
+                print("Ruby version 2.5.3 is not installed")
+                status = "not_installed"
+
+        except Exception as e:
+            print(f"An error occurred with password: {e}")
+
+    return status
+
+async def check_and_start_system_service2(remote_host, ssh_username, service_name):
+    status = ""
+    client = await check_if_password_works(remote_host, ssh_username)
+    if isinstance(client,AsyncParamikoSSHClient):
+        try:
+            await client.clsConnect()
+            # Run the systemctl command to check the status of the MySQL service
+            cmd = "systemctl status "+service_name
+            output = await client.send_command(cmd)
+
+            # Check the output for the service status
+            if b"Active: active" in output:
+                print(f" '{service_name}' is running")
+                status = "running"
+            else:
+                print(f" '{service_name}' is not running")
+                status = "not_running"
+        except Exception as e:
+            print(f"An error occurred with password: {e}")
+
+    return status
+
+# retuns AsyncParamikoSSHClient instance
+async def check_if_password_works(remote_host, ssh_username):
+    redisInstance = RedisCls()
+    await redisInstance.connect()
+    redisPassword = await redisInstance.getPswrd(remote_host)
+
+    # Use Redis password if available, otherwise iterate through password list
+    passwords_to_try = [redisPassword] if redisPassword else password_list
+
+    for password in passwords_to_try:
+        try:
+            client = AsyncParamikoSSHClient(host=remote_host, username=ssh_username,
+                    password=str(password).strip())
+            
+            await client.clsConnect()
+            await redisInstance.updatePswrdDict(remote_host, password)
+            return client
+        except paramiko.SSHException as e:
+            print("Unable to establish SSH connection:", str(e))
+        except Exception as e:
+            print(e)
+        finally:
+            client.close()
+        

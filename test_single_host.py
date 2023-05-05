@@ -1,7 +1,7 @@
 from multiprocessing import Process
 import time
 from utils import net
-from exporters import get_host_details, get_versions, ping_exporter, check_poc_mysql_service, check_poc_nginx_service
+from exporters import get_host_details, get_versions, ping_exporter, check_poc_mysql_service2, check_poc_ruby_version2
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -16,14 +16,14 @@ def init():
 
     
 
-    ip_address = "10.41.161.3"
-    user_name  = "meduser"
+    ip_address = "0.0.0.0"
+    user_name  = "dominic"
     site_name  = "ntchisi_dho"
 
     # create a new process instance
     # exports versions of apps on the host
-    process_1 = Process(target=get_versions, args=(
-        ip_address, user_name, site_name, app_dirs, headers,))
+    process_1 = Process(target=check_poc_ruby_version2, args=(
+        ip_address, user_name, headers,))
     # start the process
     process_1.start()
     # add the process to the list
@@ -31,7 +31,7 @@ def init():
 
     # create a new process instance
     # exports os details
-    process_2 = Process(target=get_host_details,
+    process_2 = Process(target=check_poc_mysql_service2,
                         args=(ip_address, user_name, headers,))
     # start the process
     process_2.start()
@@ -40,26 +40,26 @@ def init():
 
     # create a new process instance
     # exports sites system poc services
-    process_3 = Process(target=check_poc_mysql_service,
-                        args=(ip_address, user_name, headers,))
-    # start the process
-    process_3.start()
-    # add the process to the list
-    processes.append(process_3)
+    # process_3 = Process(target=check_poc_mysql_service2,
+    #                     args=(ip_address, user_name, headers,))
+    # # start the process
+    # process_3.start()
+    # # add the process to the list
+    # processes.append(process_3)
 
-    # create a new process instance
-    # exports status for system service
-    process_4 = Process(target=check_poc_nginx_service,
-                        args=(ip_address, user_name, headers,))
-    # start the process
-    process_4.start()
-    # add the process to the list
-    processes.append(process_4)
+    # # create a new process instance
+    # # exports status for system service
+    # process_4 = Process(target=check_poc_nginx_service,
+    #                     args=(ip_address, user_name, headers,))
+    # # start the process
+    # process_4.start()
+    # # add the process to the list
+    # processes.append(process_4)
 
-    process_5 = Process(target=net.save_failed_ping,
-                        args=(ip_address, user_name, site_name,))
-    process_5.start()
-    processes.append(process_5)
+    # process_5 = Process(target=net.save_failed_ping,
+    #                     args=(ip_address, user_name, site_name,))
+    # process_5.start()
+    # processes.append(process_5)
 
     # exports results of a ping of host
     # ping_exporter(ip_address, headers)
