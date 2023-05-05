@@ -204,7 +204,7 @@ async def check_if_password_works(remote_host, ssh_username):
                     password=str(password).strip())
             
             await client.clsConnect()
-            await redisInstance.updatePswrdDict(remote_host, password)
+            await redisInstance.updatePswrdDict(remote_host, str(password).strip())
             return client
         except paramiko.SSHException as e:
             print("Unable to establish SSH connection:", str(e))
