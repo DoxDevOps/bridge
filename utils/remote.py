@@ -135,6 +135,7 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                 # remaining_ram
                 collection.append(ram_utilazation[6])
 
+                min_collection = []
                 for app_dir in app_dirs:
                     await client.clsConnect()
                     git_describe_cmd = f"cd {app_dir} && git describe"
@@ -142,8 +143,15 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                     client.close()
                     result = stdout.splitlines()
                     version = f"{result[0]}".split("'")[1]
-                    collection.append(version)
+                    app_version = {"ip_address": ip_address,
+                                   "app_dir": app_dir,
+                                    "version": version
+                                }
+                    min_collection.append(app_version)
+
+                collection.append(min_collection)
                 
+                minutre_collection = []
                 for service_name in service_names:
                     status = ""
                     await client.clsConnect()
@@ -154,13 +162,13 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
 
                     # Check the output for the service status
                     if b"Active: active" in output:
-                        print(f" '{service_name}' is running")
                         status = "running"
                     else:
-                        print(f" '{service_name}' is not running")
                         status = "not_running"
                     
-                    collection.append(status)
+                    minutre_collection.append(status)
+                
+                collection.append(minutre_collection)
 
                 return collection
             except Exception as e:
