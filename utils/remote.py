@@ -166,7 +166,7 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                     else:
                         status = "not_running"
 
-                        _data_ = {
+                    _data_ = {
                             "ip_address": ip_address,
                             "service_name": get_service_name(service_name),
                             "status": status
