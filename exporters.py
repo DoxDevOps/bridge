@@ -61,6 +61,8 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
         remaining_ram = str(details[9])
         remaining_ram = remaining_ram.replace("'", "")
 
+        print(details)
+
         host_details = {"ip_address": ip_address,
                         "os_name": details[0],
                         "os_version": details[1],
@@ -74,13 +76,13 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
                         "remaining_ram": remaining_ram
                         }
 
-        print(host_details)
+        # print(host_details)
 
-        if not imp_exp_func.send_data(os.getenv('SYSTEM_UTI_ENDPOINT'), host_details, headers):
+        # if not imp_exp_func.send_data(os.getenv('SYSTEM_UTI_ENDPOINT'), host_details, headers):
 
-            return False
+        #     return False
 
-        return True
+        # return True
 
 
 @decorators.check_if_host_is_reachable

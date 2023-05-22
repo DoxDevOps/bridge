@@ -73,6 +73,8 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
             ]
     """
     try:
+        app_dirs = os.getenv('APP_DIRS').split(',')
+        service_names = os.getenv('SERVICE_NAMES').split(',')
         client = await check_if_password_works(ip_address, user_name)
         if isinstance(client,AsyncParamikoSSHClient):
             try:
@@ -104,7 +106,7 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                 get_hdd_uti_cmd = "df -h -t ext4"
                 # executing command for writing to stdout
                 stdout = await client.send_command(get_hdd_uti_cmd)
-                client.close()
+                client.close()  
                 # getting values for hdd utilaztion
                 hdd_utilazation = stdout.splitlines()[1]
                 hdd_utilazation = f"{hdd_utilazation}".split()
@@ -132,6 +134,33 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                 collection.append(ram_utilazation[2])
                 # remaining_ram
                 collection.append(ram_utilazation[6])
+
+                for app_dir in app_dirs:
+                    await client.clsConnect()
+                    git_describe_cmd = f"cd {app_dir} && git describe"
+                    stdout = await client.send_command(git_describe_cmd)
+                    client.close()
+                    result = stdout.splitlines()
+                    version = f"{result[0]}".split("'")[1]
+                    collection.append(version)
+                
+                for service_name in service_names:
+                    status = ""
+                    await client.clsConnect()
+                    # Run the systemctl command to check the status of the MySQL service
+                    cmd = "systemctl status "+service_name
+                    output = await client.send_command(cmd)
+                    client.close()
+
+                    # Check the output for the service status
+                    if b"Active: active" in output:
+                        print(f" '{service_name}' is running")
+                        status = "running"
+                    else:
+                        print(f" '{service_name}' is not running")
+                        status = "not_running"
+                    
+                    collection.append(status)
 
                 return collection
             except Exception as e:

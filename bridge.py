@@ -26,12 +26,12 @@ def init():
 
         # create a new process instance
         # exports versions of apps on the host
-        process_1 = Process(target=get_versions, args=(
-            ip_address, user_name, app_dirs, headers,))
-        # start the process
-        process_1.start()
-        # add the process to the list
-        processes.append(process_1)
+        # process_1 = Process(target=get_versions, args=(
+        #     ip_address, user_name, app_dirs, headers,))
+        # # start the process
+        # process_1.start()
+        # # add the process to the list
+        # processes.append(process_1)
 
         # create a new process instance
         # exports os details
@@ -42,23 +42,23 @@ def init():
         # add the process to the list
         processes.append(process_2)
 
-        # create a new process instance
-        # exports sites system poc services
-        process_3 = Process(target=check_poc_mysql_service,
-                            args=(ip_address, user_name, headers,))
-        # start the process
-        process_3.start()
-        # add the process to the list
-        processes.append(process_3)
+        # # create a new process instance
+        # # exports sites system poc services
+        # process_3 = Process(target=check_poc_mysql_service,
+        #                     args=(ip_address, user_name, headers,))
+        # # start the process
+        # process_3.start()
+        # # add the process to the list
+        # processes.append(process_3)
 
-        # create a new process instance
-        # exports status for system service
-        process_4 = Process(target=check_poc_nginx_service,
-                            args=(ip_address, user_name, headers,))
-        # start the process
-        process_4.start()
-        # add the process to the list
-        processes.append(process_4)
+        # # create a new process instance
+        # # exports status for system service
+        # process_4 = Process(target=check_poc_nginx_service,
+        #                     args=(ip_address, user_name, headers,))
+        # # start the process
+        # process_4.start()
+        # # add the process to the list
+        # processes.append(process_4)
 
         # process_5 = Process(target=net.save_failed_ping,
         #                     args=(ip_address, user_name, site_name,))
