@@ -63,7 +63,7 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
 
         print(details)
 
-        host_details = {"ip_address": ip_address,
+        host_utilization = {"ip_address": ip_address,
                         "os_name": details[0],
                         "os_version": details[1],
                         "cpu_utilization": details[2],
@@ -75,14 +75,28 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
                         "used_ram": details[8],
                         "remaining_ram": remaining_ram
                         }
+    
+        host_system_versions = details[10]
+        host_system_services = details[11]
 
-        # print(host_details)
+        for host_system_version in host_system_versions:
+            try:
+                imp_exp_func.send_data(
+                    os.getenv('EXPORTER_ENDPOINT'), host_system_version, headers)
+            except Exception as e:
+                print("eeror: ", e)
 
-        # if not imp_exp_func.send_data(os.getenv('SYSTEM_UTI_ENDPOINT'), host_details, headers):
+        for host_system_service in host_system_services:
+            try:
+                imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), host_system_service, headers)
+            except Exception as e:
+                print("eeror: ", e)
 
-        #     return False
+        if not imp_exp_func.send_data(os.getenv('SYSTEM_UTI_ENDPOINT'), host_utilization, headers):
 
-        # return True
+            return False
+
+        return True
 
 
 @decorators.check_if_host_is_reachable

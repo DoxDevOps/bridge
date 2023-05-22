@@ -23,6 +23,11 @@ def host_is_reachable(ip_address: str) -> bool:
 
     return True
 
+def get_service_name(service):
+    parts = service.split('.')
+    first_part = parts[0]
+    return first_part.capitalize()
+
 def save_failed_ping(ip_address: IPv4Address, user_name: str, site_name: str):
     result = subprocess.run(['ping', '-c', '1', str(ip_address)], stdout=subprocess.PIPE)
     if result.returncode != 0:
@@ -51,7 +56,7 @@ class AsyncParamikoSSHClient(paramiko.SSHClient):
         channel = self.exec_command(command)
         stdin, stdout, stderr = channel
         output = stdout.read()
-        self.close()
+        # self.close()
         return output
 
     async def receive_command(self, command):

@@ -3,7 +3,7 @@ import re
 import paramiko
 import os
 import asyncio
-from .net import AsyncParamikoSSHClient, RedisCls
+from .net import AsyncParamikoSSHClient, RedisCls, get_service_name
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -42,7 +42,7 @@ async def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
                 return collection
 
             except Exception as e:
-                print("An error occured: ", e)
+                print("An error occured fn(check_if_password_works): ", e)
 
     except Exception as e:
         print(
@@ -82,7 +82,7 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                 # Linux command for system version inf
                 cmd = "cat /etc/os-release"
                 output = await client.send_command(cmd)
-                client.close()
+                
                 # Output command execution results
                 result = output.splitlines()
                 # string of both os name and version
@@ -90,23 +90,23 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                 # array of both os anme and version
                 collection = re.findall('"([^"]*)"', inputstring)
 
-                await client.clsConnect()
+                
                 # Linux command for cpu utilazation command
                 get_cpu_uti_cmd = "top -bn2 | grep '%Cpu' | tail -1 | grep -P '(....|...) id,'|awk '{print  100-$8 }'"
                 # executing command for writing to stdout
                 stdout  = await client.send_command(get_cpu_uti_cmd)
-                client.close()
+                
                 # getting value for cpu utilzation
                 cpu_utilization = stdout.splitlines()[0]
                 cpu_utilization = f"{cpu_utilization}"
                 collection.append(cpu_utilization.split("'")[1])
 
-                await client.clsConnect()
+                
                 # Linux command for HDD utilazation command
                 get_hdd_uti_cmd = "df -h -t ext4"
                 # executing command for writing to stdout
                 stdout = await client.send_command(get_hdd_uti_cmd)
-                client.close()  
+                  
                 # getting values for hdd utilaztion
                 hdd_utilazation = stdout.splitlines()[1]
                 hdd_utilazation = f"{hdd_utilazation}".split()
@@ -119,12 +119,12 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                 # remaining_storage_percentile
                 collection.append(hdd_utilazation[4])
 
-                await client.clsConnect()
+                
                 # Linux command for RAM utilazation command
                 get_ram_uti_cmd = "free -h"
                 # executing command for writing to stdout
                 stdout = await client.send_command(get_ram_uti_cmd)
-                client.close()
+                
                 # getting values for hdd utilaztion
                 ram_utilazation = stdout.splitlines()[1]
                 ram_utilazation = f"{ram_utilazation}".split()
@@ -137,10 +137,10 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
 
                 min_collection = []
                 for app_dir in app_dirs:
-                    await client.clsConnect()
+                    
                     git_describe_cmd = f"cd {app_dir} && git describe"
                     stdout = await client.send_command(git_describe_cmd)
-                    client.close()
+                    
                     result = stdout.splitlines()
                     version = f"{result[0]}".split("'")[1]
                     app_version = {"ip_address": ip_address,
@@ -154,25 +154,32 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                 minutre_collection = []
                 for service_name in service_names:
                     status = ""
-                    await client.clsConnect()
+                    
                     # Run the systemctl command to check the status of the MySQL service
                     cmd = "systemctl status "+service_name
                     output = await client.send_command(cmd)
-                    client.close()
+                    
 
                     # Check the output for the service status
                     if b"Active: active" in output:
                         status = "running"
                     else:
                         status = "not_running"
+
+                        _data_ = {
+                            "ip_address": ip_address,
+                            "service_name": get_service_name(service_name),
+                            "status": status
+                        }
                     
-                    minutre_collection.append(status)
+                    minutre_collection.append(_data_)
                 
                 collection.append(minutre_collection)
 
+                client.close()
                 return collection
             except Exception as e:
-                print("An error occured: ", e)
+                print("An error occured fn(get_host_system_details): ", e)
 
     except Exception as e:
         print(
