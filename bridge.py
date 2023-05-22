@@ -3,7 +3,7 @@ import time
 from time import sleep
 import schedule
 from utils import imp_exp_func, net
-from exporters import get_host_details, get_versions, ping_exporter, check_poc_mysql_service, check_poc_nginx_service,check_poc_ruby_version
+from exporters import get_host_details
 import os
 from dotenv import load_dotenv
 load_dotenv()

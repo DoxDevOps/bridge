@@ -5,29 +5,6 @@ import asyncio
 load_dotenv()
 
 
-@decorators.check_if_host_is_reachable
-def get_versions(ip_address: str, user_name: str, app_dirs: list, headers: dict) -> bool:
-
-    for app_dir in app_dirs:
-
-        print(
-            f"*** Starting to export version details for {app_dir} for host {ip_address}")
-
-        details = asyncio.run(remote.get_app_version(
-            user_name, ip_address, app_dir))
-
-        if type(details) == list:
-
-            app_version = {"ip_address": ip_address,
-                           "app_dir": app_dir, "version": details[0]}
-
-            try:
-                imp_exp_func.send_data(
-                    os.getenv('EXPORTER_ENDPOINT'), app_version, headers)
-            except Exception as e:
-                print("eeror: ", e)
-
-
 def ping_exporter(ip_address: str, headers: dict) -> bool:
 
     status = "up"
@@ -98,26 +75,6 @@ def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
 
         return True
 
-
-@decorators.check_if_host_is_reachable
-def check_poc_nginx_service(ip_address: str, user_name: str, headers: dict) -> bool:
-    status =  asyncio.run(remote.check_and_start_system_service2(
-        ip_address, user_name, "nginx.service"))
-
-    if status:
-        data = {
-            "ip_address": ip_address,
-            "service_name": "Nginx",
-            "status": status
-        }
-
-        if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
-
-            return False
-
-    return True
-
-
 @decorators.check_if_host_is_reachable
 def check_poc_ruby_version(ip_address: str, user_name: str, headers: dict) -> bool:
     status = remote.check_ruby_version(ip_address, user_name)
@@ -131,30 +88,4 @@ def check_poc_ruby_version(ip_address: str, user_name: str, headers: dict) -> bo
     print(status)
 
     return True
-
-@decorators.check_if_host_is_reachable
-def check_poc_mysql_service(ip_address: str, user_name: str, headers: dict) -> bool:
-    status = asyncio.run(remote.check_and_start_system_service2(
-        ip_address, user_name, "mysql.service"))
-
-    if status:
-        data = {"ip_address": ip_address,
-                "service_name": "MySQL",
-                "status": status
-                }
-        
-        print(data)
-
-        if not imp_exp_func.send_data(os.getenv('SYSTEM_SERVICE_ENDPOINT'), data, headers):
-
-            return False
-
-    return True
-
-# @decorators.check_if_host_is_reachable
-# def dropListFunctions(ip_address: str, user_name: str, headers: dict) -> bool:
-#     print("dropListFunctions")
-#     check_poc_mysql_service2(ip_address, user_name, headers)
-#     check_poc_ruby_version2(ip_address, user_name, headers)
-#     return True
 

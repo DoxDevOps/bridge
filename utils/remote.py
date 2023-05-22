@@ -15,40 +15,6 @@ password_list = [password.strip("['").strip("']") for password in passwords]
 password_list = [password.replace("'", "").strip("")
                  for password in password_list]
 
-async def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
-    """gets version of an application running on remote server
-
-    Args:
-        user_name (str): remote user name
-        ip_address (str): ip address of remote server
-        app_dir (str): directory of application
-        facility_name: name of facility
-
-    Returns:
-        str: version of application on remote server
-    """
-    try:
-        client = await check_if_password_works(ip_address, user_name)
-        if isinstance(client,AsyncParamikoSSHClient):
-            try:
-                await client.clsConnect()
-                cmd = f"cd {app_dir} && git describe"
-                stdout = await client.send_command(cmd)
-                client.close()
-                result = stdout.splitlines()
-                version = f"{result[0]}".split("'")[1]
-
-                collection = [version]
-                return collection
-
-            except Exception as e:
-                print("An error occured fn(check_if_password_works): ", e)
-
-    except Exception as e:
-        print(
-            f"--- Failed to get version for {ip_address} for {app_dir} with exception: {e} ---")
-        return "failed_to_get_version"
-
 
 async def get_host_system_details(user_name: str, ip_address: str) -> str:
     """gets version of operating system running on remote host
@@ -186,52 +152,6 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
             f"--- Failed to get host system details for {ip_address} with exception: {e} ---")
         return "failed_to_get_host_system_details"
 
-async def check_ruby_version2(remote_host, ssh_username):
-    status = ""
-    client = await check_if_password_works(remote_host, ssh_username)
-    if isinstance(client,AsyncParamikoSSHClient):
-        try:
-            await client.clsConnect()
-            # Run the command to check the Ruby version
-            cmd = "ruby -v | grep '2.5.3'"
-            output = await client.send_command(cmd)
-            client.close()
-
-            # Check the output for the Ruby version
-            if b"2.5.3" in output:
-                print("Ruby version 2.5.3 is installed")
-                status = "installed"
-            else:
-                print("Ruby version 2.5.3 is not installed")
-                status = "not_installed"
-
-        except Exception as e:
-            print(f"An error occurred with password: {e}")
-
-    return status
-
-async def check_and_start_system_service2(remote_host, ssh_username, service_name):
-    status = ""
-    client = await check_if_password_works(remote_host, ssh_username)
-    if isinstance(client,AsyncParamikoSSHClient):
-        try:
-            await client.clsConnect()
-            # Run the systemctl command to check the status of the MySQL service
-            cmd = "systemctl status "+service_name
-            output = await client.send_command(cmd)
-            client.close()
-
-            # Check the output for the service status
-            if b"Active: active" in output:
-                print(f" '{service_name}' is running")
-                status = "running"
-            else:
-                print(f" '{service_name}' is not running")
-                status = "not_running"
-        except Exception as e:
-            print(f"An error occurred with password: {e}")
-
-    return status
 
 # retuns AsyncParamikoSSHClient instance
 async def check_if_password_works(remote_host, ssh_username):
