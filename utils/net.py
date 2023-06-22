@@ -1,6 +1,10 @@
 import platform
 import subprocess
-from ipaddress import IPv4Address
+import pickle
+import os
+import paramiko
+import threading
+import redis
 
 
 def host_is_reachable(ip_address: str) -> bool:
@@ -20,8 +24,34 @@ def host_is_reachable(ip_address: str) -> bool:
 
     return True
 
-def save_failed_ping(ip_address: IPv4Address, user_name: str, site_name: str):
-    result = subprocess.run(['ping', '-c', '1', str(ip_address)], stdout=subprocess.PIPE)
-    if result.returncode != 0:
-        with open('failed_ping_ips.txt', 'a') as f:
-            f.write(f"Failed ping from {user_name} at {site_name}: {ip_address}\n")
+
+# create a Redis client
+r = redis.Redis(host='localhost', port=6379, db=0)
+
+def updatePswrdDict(key, value):
+    # update or insert a key-value pair
+    # r.set(key, value)
+    True
+
+def getPswrd(ip_address):
+    # get the value for the given key, or return False if the key is not in Redis
+    # value = r.get(ip_address)
+
+    # if value is None:
+    #     return False
+    # else:
+    #     return value.decode('utf-8')
+    return False
+
+
+def is_password_valid(host, username, password):
+    """Check if the given password works by trying to connect to a remote server"""
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        ssh.connect(host, username=username, password=password)
+        ssh.close()
+        return True
+    except (paramiko.AuthenticationException, paramiko.SSHException) as e:
+        ssh.close()
+        return False

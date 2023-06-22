@@ -1,4 +1,4 @@
-from curses import echo
+from utils.net import updatePswrdDict, getPswrd, is_password_valid
 import re
 import paramiko
 import os
@@ -6,11 +6,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 _PASSWORDS_ = os.getenv('PASSWORDS')
-passwords = _PASSWORDS_.split(',')
-# Step 1: Remove unwanted characters (square brackets and single quotes) from the passwords
-password_list = [password.strip("['").strip("']") for password in passwords]
-password_list = [password.replace("'", "").strip("")
-                 for password in password_list]
 
 
 def get_app_version(user_name: str, ip_address: str, facility_name: str, app_dir: str) -> str:
@@ -37,10 +32,20 @@ def get_app_version(user_name: str, ip_address: str, facility_name: str, app_dir
         # tracker
         count = 0
 
-        for each_password in password_list:
+        SVR_PASSWORD = ''
+        if getPswrd(ip_address):
+            SVR_PASSWORD = getPswrd(ip_address)
+        else:
+            for password in _PASSWORDS_:
+                if is_password_valid(ip_address, user_name, password):
+                    updatePswrdDict(ip_address, password)
+                    SVR_PASSWORD = password
+                    break
+
+        if SVR_PASSWORD:
             try:
                 ssh.connect(ip_address, username=user_name,
-                            password=each_password.strip())
+                            password=SVR_PASSWORD)
                 stdin, stdout, stderr = ssh.exec_command(
                     f"cd {app_dir} && git describe")
                 result = stdout.read().splitlines()
@@ -54,11 +59,6 @@ def get_app_version(user_name: str, ip_address: str, facility_name: str, app_dir
 
             except Exception as e:
                 print("An error occured: ", e)
-                count += 1
-                if count == len(password_list):
-                    # Write failed IP addresses to a file
-                    with open("failed_ssh_ips.txt", "a") as f:
-                        f.write(facility_name + " "+ip_address + "\n")
 
     except Exception as e:
         print(
@@ -97,10 +97,20 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         # a private key will be used soon
         # AUTO SSH IS NEEDED ON THIS
 
-        for each_password in password_list:
+        SVR_PASSWORD = ''
+        if getPswrd(ip_address):
+            SVR_PASSWORD = getPswrd(ip_address)
+        else:
+            for password in _PASSWORDS_:
+                if is_password_valid(ip_address, user_name, password):
+                    updatePswrdDict(ip_address, password)
+                    SVR_PASSWORD = password
+                    break
+
+        if SVR_PASSWORD:
             try:
                 ssh.connect(ip_address, username=user_name,
-                            password=each_password.strip())
+                            password=SVR_PASSWORD)
                 # Linux command for system version inf
                 stdin, stdout, stderr = ssh.exec_command("cat /etc/os-release")
                 # Output command execution results
@@ -161,52 +171,150 @@ def get_host_system_details(user_name: str, ip_address: str) -> str:
         return "failed_to_get_host_system_details"
 
 
-def check_and_start_system_service(remote_host, ssh_username, service_name):
-    status = ""
-    for password in password_list:
+def check_and_start_mysql_service(remote_host, ssh_username):
+    status = ''
+    SVR_PASSWORD = ''
+    if getPswrd(remote_host):
+        SVR_PASSWORD = getPswrd(remote_host)
+    else:
+        for password in _PASSWORDS_:
+            if is_password_valid(remote_host, ssh_username, password):
+                updatePswrdDict(remote_host, password)
+                SVR_PASSWORD = password
+                break
+
+    if SVR_PASSWORD:
         try:
             # Set up a SSH client and connect to the remote host
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(remote_host, username=ssh_username,
-                        password=password.strip())
+                        password=SVR_PASSWORD)
 
             # Run the systemctl command to check the status of the MySQL service
-            cmd = "systemctl status "+service_name
+            cmd = "systemctl status mysql.service"
             stdin, stdout, stderr = ssh.exec_command(cmd)
             output = stdout.read()
 
             # Check the output for the service status
             if b"Active: active" in output:
-                print(f" '{service_name}' is running")
+                print(f" mysql.service is running")
                 status = "running"
             else:
-                print(f" '{service_name}' is not running")
+                print("MySQL service is not running")
                 status = "not_running"
+
+                # # If the service is not running, try to start it
+                # print("MySQL service is not running. tempting to start...")
+                # cmd = "systemctl start mysql.service"
+                # stdin, stdout, stderr = ssh.exec_command(cmd)
+                # output = stdout.read()
+
+                # # Check the output for errors
+                # if stderr:
+                #     print(f"Error starting MySQL service: {stderr}")
+                #     status = "error"
+                # else:
+                #     print("MySQL service started successfully")
+                #     status = "started"
 
             # Close the SSH connection
             ssh.close()
-            break  # Stop looping once a successful connection is established
         except paramiko.AuthenticationException as e:
             print(f"Authentication failed with password: {e}")
+            status = "auth_error"
         except paramiko.SSHException as e:
             print(
                 f"Unable to establish SSH connection with password: {e}")
+            status = "ssh_error"
         except Exception as e:
             print(f"An error occurred with password: {e}")
+            status = "unknown_error"
 
     return status
 
 
-def check_ruby_version(remote_host, ssh_username):
-    status = ""
-    for password in password_list:
+def check_and_start_nginx_service(remote_host, ssh_username):
+    status = ''
+    SVR_PASSWORD = ''
+    if getPswrd(remote_host):
+        SVR_PASSWORD = getPswrd(remote_host)
+    else:
+        for password in _PASSWORDS_:
+            if is_password_valid(remote_host, ssh_username, password):
+                updatePswrdDict(remote_host, password)
+                SVR_PASSWORD = password
+                break
+
+    if SVR_PASSWORD:
         try:
             # Set up an SSH client and connect to the remote host
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(remote_host, username=ssh_username,
-                        password=password.strip())
+                        password=SVR_PASSWORD)
+
+            # Run the systemctl command to check the status of the nginx service
+            cmd = "systemctl status nginx.service"
+            stdin, stdout, stderr = ssh.exec_command(cmd)
+            output = stdout.read()
+
+            # Check the output for the service status
+            if b"Active: active" in output:
+                print("nginx service is running")
+                status = "running"
+            else:
+                print("nginx service is not running")
+                status = "not_running"
+
+                # # If the service is not running, try to start it
+                # print("Attempting to start nginx service...")
+                # cmd = "systemctl start nginx.service"
+                # stdin, stdout, stderr = ssh.exec_command(cmd)
+                # output = stdout.read()
+
+                # # Check the output for errors
+                # if stderr:
+                #     print(f"Error starting nginx service: {stderr}")
+                #     status = "error"
+                # else:
+                #     print("nginx service started successfully")
+                #     status = "started"
+
+            # Close the SSH connection
+            ssh.close()
+        except paramiko.AuthenticationException as e:
+            print(f"Authentication failed with password: {e}")
+            status = "auth_error"
+        except paramiko.SSHException as e:
+            print(f"Unable to establish SSH connection with password: {e}")
+            status = "ssh_error"
+        except Exception as e:
+            print(f"An error occurred with password: {e}")
+            status = "unknown_error"
+
+    return status
+
+
+def check_ruby_version(remote_host, ssh_username):
+    status = ''
+    SVR_PASSWORD = ''
+    if getPswrd(remote_host):
+        SVR_PASSWORD = getPswrd(remote_host)
+    else:
+        for password in _PASSWORDS_:
+            if is_password_valid(remote_host, ssh_username, password):
+                updatePswrdDict(remote_host, password)
+                SVR_PASSWORD = password
+                break
+
+    if SVR_PASSWORD:
+        try:
+            # Set up an SSH client and connect to the remote host
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(remote_host, username=ssh_username,
+                        password=SVR_PASSWORD)
 
             # Run the command to check the Ruby version
             cmd = "ruby -v | grep '2.5.3'"
@@ -225,9 +333,12 @@ def check_ruby_version(remote_host, ssh_username):
             ssh.close()
         except paramiko.AuthenticationException as e:
             print(f"Authentication failed with password: {e}")
+            status = "auth_error"
         except paramiko.SSHException as e:
             print(f"Unable to establish SSH connection with password: {e}")
+            status = "ssh_error"
         except Exception as e:
             print(f"An error occurred with password: {e}")
+            status = "unknown_error"
 
     return status
