@@ -204,7 +204,7 @@ def check_and_start_mysql_service(remote_host, ssh_username):
                 status = "not_running"
 
                 # # If the service is not running, try to start it
-                # print("MySQL service is not running. Attempting to start...")
+                # print("MySQL service is not running. tempting to start...")
                 # cmd = "systemctl start mysql.service"
                 # stdin, stdout, stderr = ssh.exec_command(cmd)
                 # output = stdout.read()
