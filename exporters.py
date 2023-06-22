@@ -5,14 +5,14 @@ load_dotenv()
 
 
 @decorators.check_if_host_is_reachable
-def get_versions(ip_address: str, user_name: str, app_dirs: list, headers: dict) -> bool:
+def get_versions(ip_address: str, user_name: str, facility_name: str, app_dirs: list, headers: dict) -> bool:
 
     for app_dir in app_dirs:
 
         print(
             f"*** Starting to export version details for {app_dir} for host {ip_address}")
 
-        details = remote.get_app_version(user_name, ip_address, app_dir)
+        details = remote.get_app_version(user_name, ip_address, facility_name, app_dir)
 
         if type(details) == list:
 

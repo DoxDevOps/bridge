@@ -8,13 +8,14 @@ load_dotenv()
 _PASSWORDS_ = os.getenv('PASSWORDS')
 
 
-def get_app_version(user_name: str, ip_address: str, app_dir: str) -> str:
+def get_app_version(user_name: str, ip_address: str, facility_name: str, app_dir: str) -> str:
     """gets version of an application running on remote server
 
     Args:
         user_name (str): remote user name
         ip_address (str): ip address of remote server
         app_dir (str): directory of application
+        facility_name: name of facility
 
     Returns:
         str: version of application on remote server
@@ -197,7 +198,7 @@ def check_and_start_mysql_service(remote_host, ssh_username):
 
             # Check the output for the service status
             if b"Active: active" in output:
-                print("MySQL service is running")
+                print(f" mysql.service is running")
                 status = "running"
             else:
                 print("MySQL service is not running")
