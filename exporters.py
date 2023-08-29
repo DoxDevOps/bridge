@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import asyncio
 load_dotenv()
 
-
 def ping_exporter(ip_address: str, headers: dict) -> bool:
 
     status = "up"

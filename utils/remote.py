@@ -7,15 +7,6 @@ from .net import AsyncParamikoSSHClient, RedisCls, get_service_name
 from dotenv import load_dotenv
 load_dotenv()
 
-_PASSWORDS_ = os.getenv('PASSWORDS')
-passwords = _PASSWORDS_.split(',')
-
-# Step 1: Remove unwanted characters (square brackets and single quotes) from the passwords
-password_list = [password.strip("['").strip("']") for password in passwords]
-password_list = [password.replace("'", "").strip("")
-                 for password in password_list]
-
-
 async def get_host_system_details(user_name: str, ip_address: str) -> str:
     """gets version of operating system running on remote host
        gets storage stats of remote host
@@ -41,7 +32,7 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
     try:
         app_dirs = os.getenv('APP_DIRS').split(',')
         service_names = os.getenv('SERVICE_NAMES').split(',')
-        client = await check_if_password_works(ip_address, user_name)
+        client = await conect_to_remote_host(ip_address, user_name)
         if isinstance(client,AsyncParamikoSSHClient):
             try:
                 await client.clsConnect()
@@ -106,15 +97,20 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                     
                     git_describe_cmd = f"cd {app_dir} && git describe"
                     stdout = await client.send_command(git_describe_cmd)
-                    
-                    result = stdout.splitlines()
-                    version = f"{result[0]}".split("'")[1]
-                    app_version = {"ip_address": ip_address,
-                                   "app_dir": app_dir,
-                                    "version": version
-                                }
-                    min_collection.append(app_version)
 
+                    result = stdout.splitlines()
+                    try:
+                        version = f"{result[0]}".split("'")[1]
+                    except Exception as e:
+                        version = ''
+
+                    if version:
+                        app_version = {"ip_address": ip_address,
+                                    "app_dir": app_dir,
+                                        "version": version
+                                    }
+                        min_collection.append(app_version)
+                
                 collection.append(min_collection)
                 
                 minutre_collection = []
@@ -154,26 +150,15 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
 
 
 # retuns AsyncParamikoSSHClient instance
-async def check_if_password_works(remote_host, ssh_username):
-    redisInstance = RedisCls()
-    await redisInstance.connect()
-    redisPassword = await redisInstance.getPswrd(remote_host)
-
-    # Use Redis password if available, otherwise iterate through password list
-    passwords_to_try = [redisPassword] if redisPassword else password_list
-
-    for password in passwords_to_try:
-        try:
-            client = AsyncParamikoSSHClient(host=remote_host, username=ssh_username,
-                    password=str(password).strip())
-            
-            await client.clsConnect()
-            await redisInstance.updatePswrdDict(remote_host, str(password).strip())
-            return client
-        except paramiko.SSHException as e:
-            print("Unable to establish SSH connection:", str(e))
-        except Exception as e:
-            print(e)
-        finally:
-            client.close()
+async def conect_to_remote_host(remote_host, ssh_username):
+    try:
+        client = AsyncParamikoSSHClient(host=remote_host, username=ssh_username)
+        await client.clsConnect()
+        return client
+    except paramiko.SSHException as e:
+        print("Unable to establish SSH connection:", str(e))
+    except Exception as e:
+        print(e)
+    finally:
+        client.close()
         

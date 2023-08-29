@@ -1,16 +1,15 @@
 from multiprocessing import Process
 import time
-from time import sleep
-import schedule
+import random
 from utils import imp_exp_func, net
 from exporters import get_host_details
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
-
 def init():
     hosts = imp_exp_func.get_data_from_api(os.getenv('IMPORTER_ENDPOINT'))
+    random.shuffle(hosts)
     headers = {'Content-type': 'application/json',
                'Accept': 'text/plain', 'Authorization': os.getenv('EXPORTER_KEY')}
     app_dirs = os.getenv('APP_DIRS').split(',')
@@ -36,9 +35,7 @@ def init():
     # wait for all processes to finish
     for process in processes:
         process.join()
-
     return True
-
 
 if __name__ == '__main__':
     start_time = time.time()
