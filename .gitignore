@@ -130,3 +130,6 @@ dmypy.json
 
 #temporary folder
 /temp
+
+setpolicykey.txt
+uniquesetpolicykey.txt

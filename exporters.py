@@ -24,9 +24,6 @@ def ping_exporter(ip_address: str, headers: dict) -> bool:
 @decorators.check_if_host_is_reachable
 def get_host_details(ip_address: str, user_name: str, headers: dict) -> bool:
 
-    print(
-        f"*** Starting to export host system details for host {ip_address}")
-
     details = asyncio.run(remote.get_host_system_details(user_name, ip_address))
 
     if type(details) == list:

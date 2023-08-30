@@ -56,13 +56,19 @@ class AsyncParamikoSSHClient(paramiko.SSHClient):
         await future
 
     def _connect_key_based(self, host, username):
-        self.load_system_host_keys()
-        self.set_missing_host_key_policy(paramiko.WarningPolicy())
+        try:
+            self.load_system_host_keys()
+            self.set_missing_host_key_policy(paramiko.WarningPolicy())
 
-        private_key_path = os.path.expanduser("~/.ssh/id_rsa")  # Update this path if needed
-        mykey = paramiko.RSAKey(filename=private_key_path)
+            private_key_path = os.path.expanduser("~/.ssh/id_rsa")  # Update this path if needed
+            mykey = paramiko.RSAKey(filename=private_key_path)
 
-        self.connect(hostname=host, username=username, pkey=mykey, port=22)
+            self.connect(hostname=host, username=username, pkey=mykey, port=22)
+        except Exception as e:
+            with open("setpolicykey.txt", "a") as file:
+                file.write(f"ssh {self.username}@{self.host}\n")
+
+            print(f"connect key based error:  {str(e)} for HOST: {self.host}")
 
     def _connect(self, host, username, password):
         # self.connect(host, username, password)
@@ -171,8 +177,10 @@ async def add_public_key_to_authorized_keys(ip_address, username, password, publ
         client.close()
     except Exception as e:
         print(f"eerror: {e}")
+        sftp.close()
         client.close()
     finally:
+        sftp.close()
         client.close()
 
 
@@ -194,10 +202,9 @@ async def check_if_password_works(remote_host, ssh_username):
     for password in passwords_to_try:
         try:
             client = AsyncParamikoSSHClient(host=remote_host, username=ssh_username)
-            
             await client.clsConnectWithPass(password=str(password).strip())
             await redisInstance.updatePswrdDict(remote_host, str(password).strip())
-            print(password)
+            
             return str(password).strip()
         except paramiko.SSHException as e:
             print("Unable to establish SSH connection:", str(e))
@@ -205,3 +212,20 @@ async def check_if_password_works(remote_host, ssh_username):
             print(e)
         finally:
             client.close()
+
+def filter_unique_lines(input_filename, output_filename):
+    unique_lines = set()
+
+    try:
+        with open(input_filename, "r") as input_file:
+            for line in input_file:
+                stripped_line = line.strip()
+                if stripped_line not in unique_lines:
+                    unique_lines.add(stripped_line)
+    except FileNotFoundError:
+        print(f"File '{input_filename}' not found.")
+        return
+    
+    with open(output_filename, "w") as output_file:
+        for line in unique_lines:
+            output_file.write(f"{line}\n")

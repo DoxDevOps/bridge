@@ -34,6 +34,7 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
         service_names = os.getenv('SERVICE_NAMES').split(',')
         client = await conect_to_remote_host(ip_address, user_name)
         if isinstance(client,AsyncParamikoSSHClient):
+            print(f"*** Starting to export host system details for host {ip_address}")
             try:
                 await client.clsConnect()
                 # Linux command for system version inf
@@ -141,11 +142,11 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                 client.close()
                 return collection
             except Exception as e:
+                client.close()
                 print("An error occured fn(get_host_system_details): ", e)
 
     except Exception as e:
-        print(
-            f"--- Failed to get host system details for {ip_address} with exception: {e} ---")
+        print(f"--- Failed to get host system details for {ip_address} with exception: {e} ---")
         return "failed_to_get_host_system_details"
 
 
@@ -158,7 +159,4 @@ async def conect_to_remote_host(remote_host, ssh_username):
     except paramiko.SSHException as e:
         print("Unable to establish SSH connection:", str(e))
     except Exception as e:
-        print(e)
-    finally:
-        client.close()
-        
+        print("conect to remote host error:", str(e))
