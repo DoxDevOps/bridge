@@ -6,37 +6,26 @@ import paramiko
 import redis
 import os
 import asyncssh
+import socket
 from . import decorators2
 from dotenv import load_dotenv
 load_dotenv()
 
-def host_is_reachable(ip_address: str) -> bool:
-    """checks if remote host is reachable
-
-        Args:
-            ip_address (str): ip address of remote server
-
-        Returns:
-            bool: True if remote host is reachable, False otherwise
-        """
-
-    param = '-n' if platform.system().lower() == 'windows' else '-c'
-
-    if subprocess.call(['ping', param, '1', ip_address]) != 0:
+def host_is_reachable(ip_address, port=80):
+    try:
+        # Create a socket object
+        sock = socket.create_connection((ip_address, port), timeout=5)
+        # Close the socket
+        sock.close()
+        return True
+    except (socket.timeout, ConnectionRefusedError):
         return False
-
-    return True
 
 def get_service_name(service):
     parts = service.split('.')
     first_part = parts[0]
     return first_part.capitalize()
 
-def save_failed_ping(ip_address: IPv4Address, user_name: str, site_name: str):
-    result = subprocess.run(['ping', '-c', '1', str(ip_address)], stdout=subprocess.PIPE)
-    if result.returncode != 0:
-        with open('failed_ping_ips.txt', 'a') as f:
-            f.write(f"Failed ping from {user_name} at {site_name}: {ip_address}\n")
 
 class AsyncParamikoSSHClient(paramiko.SSHClient):
     
@@ -60,7 +49,11 @@ class AsyncParamikoSSHClient(paramiko.SSHClient):
             self.load_system_host_keys()
             self.set_missing_host_key_policy(paramiko.WarningPolicy())
 
-            private_key_path = os.path.expanduser("~/.ssh/id_rsa")  # Update this path if needed
+            # Determine the path to the private key dynamically
+            private_key_path = os.path.expanduser("~/.ssh/id_rsa")  # Default path
+            if "SSH_PRIVATE_KEY_PATH" in os.environ:
+                private_key_path = os.environ["SSH_PRIVATE_KEY_PATH"]
+
             mykey = paramiko.RSAKey(filename=private_key_path)
 
             self.connect(hostname=host, username=username, pkey=mykey, port=22)

@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copy the script and other necessary files
 COPY bridge.py /app/
-COPY utils.py /app/
+COPY utils/ /app/utils/
 COPY exporters.py /app/
 COPY requirements.txt /app/
 COPY .env /app/  

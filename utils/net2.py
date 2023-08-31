@@ -1,19 +1,11 @@
-import platform
-import subprocess
+import socket
 
-def host_is_reachable2(ip_address: str) -> bool:
-    """checks if remote host is reachable
-
-        Args:
-            ip_address (str): ip address of remote server
-
-        Returns:
-            bool: True if remote host is reachable, False otherwise
-        """
-
-    param = '-n' if platform.system().lower() == 'windows' else '-c'
-
-    if subprocess.call(['ping', param, '1', ip_address]) != 0:
+def host_is_reachable2(ip_address, port=80):
+    try:
+        # Create a socket object
+        sock = socket.create_connection((ip_address, port), timeout=5)
+        # Close the socket
+        sock.close()
+        return True
+    except (socket.timeout, ConnectionRefusedError):
         return False
-
-    return True
