@@ -20,6 +20,7 @@ def host_is_reachable(ip_address, port=22):
         sock.close()
         return True
     except (socket.timeout, ConnectionRefusedError):
+        sock.close()
         return False
 
 def get_service_name(service):
