@@ -155,7 +155,7 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                 return collection
             except Exception as e:
                 client.close()
-                print("An error occured fn(get_host_system_details): ", str(e)+" ip_address: ssh "+user_name+"@"+ip_address)
+                print("An error occured fn(get_host_system_details): ", str(e)+" ip_address: ssh-copy-id "+user_name+"@"+ip_address)
 
     except Exception as e:
         print(f"--- Failed to get host system details for {ip_address} with exception: {e} ---")
