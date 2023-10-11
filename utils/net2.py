@@ -1,6 +1,6 @@
 import socket
 
-def host_is_reachable2(ip_address, port=80):
+def host_is_reachable2(ip_address, port=22):
     try:
         # Create a socket object
         sock = socket.create_connection((ip_address, port), timeout=5)

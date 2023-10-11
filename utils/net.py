@@ -8,10 +8,11 @@ import os
 import asyncssh
 import socket
 from . import decorators2
+import re
 from dotenv import load_dotenv
 load_dotenv()
 
-def host_is_reachable(ip_address, port=80):
+def host_is_reachable(ip_address, port=22):
     try:
         # Create a socket object
         sock = socket.create_connection((ip_address, port), timeout=5)
@@ -26,6 +27,19 @@ def get_service_name(service):
     first_part = parts[0]
     return first_part.capitalize()
 
+def extract_distrib_version(input_string):
+    match = re.search(r'Distrib\s([\d.]+)', input_string.decode('utf-8'))
+    if match:
+        return match.group(1)
+    else:
+        return None
+
+def extract_version_number(input_string):
+    match = re.search(r'Ver\s(\d+(?:\.\d+)+)', input_string.decode('utf-8'))
+    if match:
+        return match.group(1)
+    else:
+        return None
 
 class AsyncParamikoSSHClient(paramiko.SSHClient):
     

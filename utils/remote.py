@@ -3,7 +3,7 @@ import re
 import paramiko
 import os
 import asyncio
-from .net import AsyncParamikoSSHClient, RedisCls, get_service_name
+from .net import AsyncParamikoSSHClient, RedisCls, get_service_name, extract_distrib_version, extract_version_number
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -122,7 +122,6 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                     cmd = "systemctl status "+service_name
                     output = await client.send_command(cmd)
                     
-
                     # Check the output for the service status
                     if b"Active: active" in output:
                         status = "running"
@@ -134,9 +133,22 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
                             "service_name": get_service_name(service_name),
                             "status": status
                         }
-                    
                     minutre_collection.append(_data_)
-                
+
+                    if service_name == 'mysql.service':
+                        service_name = service_name.replace(".service", "")
+                        cmd = service_name+" --version"
+                        output = await client.send_command(cmd)
+
+                        version = extract_distrib_version(output) if b"Distrib" in output else extract_version_number(output)
+                        if version:
+                            app_version = {
+                                "ip_address": ip_address,
+                                "app_dir": '/var/www/mysql',
+                                "version": version
+                            }
+                            min_collection.append(app_version)
+
                 collection.append(minutre_collection)
 
                 client.close()
@@ -148,7 +160,6 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
     except Exception as e:
         print(f"--- Failed to get host system details for {ip_address} with exception: {e} ---")
         return "failed_to_get_host_system_details"
-
 
 # retuns AsyncParamikoSSHClient instance
 async def conect_to_remote_host(remote_host, ssh_username):
