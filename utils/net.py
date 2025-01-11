@@ -3,9 +3,7 @@ import subprocess
 from ipaddress import IPv4Address
 import asyncio
 import paramiko
-import redis
 import os
-import asyncssh
 import socket
 from . import decorators2
 import re
@@ -164,6 +162,15 @@ class AsyncParamikoSSHClient(paramiko.SSHClient):
         output = await channel.read_until_eof()
         channel.close()
         return output
+    
+    def is_connected(self):
+        """
+        Check if the client is connected to the SSH server.
+        """
+        transport = self.get_transport()
+        if transport and transport.is_active():
+            return True
+        return False
 
 from redis.asyncio import Redis
 

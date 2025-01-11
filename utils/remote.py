@@ -2,7 +2,6 @@ from curses import echo
 import re
 import paramiko
 import os
-import asyncio
 from .net import AsyncParamikoSSHClient, RedisCls, get_service_name, extract_distrib_version, extract_version_number
 from dotenv import load_dotenv
 load_dotenv()
@@ -37,6 +36,11 @@ async def get_host_system_details(user_name: str, ip_address: str) -> str:
             print(f"*** Starting to export host system details for host {ip_address}")
             try:
                 await client.clsConnect()
+
+                if client.is_connected() == False:
+                    client.close()
+                    return
+                
                 # Linux command for system version inf
                 cmd = "cat /etc/os-release"
                 output = await client.send_command(cmd)
