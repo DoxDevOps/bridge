@@ -1,0 +1,19 @@
+
+[Unit]
+Description = bridge web service
+After       = network.target
+
+[Service]
+WorkingDirectory=/var/www/bridge
+ExecStart=/usr/bin/python3 /var/www/bridge/bridge.py
+
+# In case if it gets stopped, restart it immediately
+Restart     = always
+
+Type        = simple
+
+
+[Install]
+# multi-user.target corresponds to run level 3
+# roughtly meaning wanted by system start
+WantedBy    = multi-user.target

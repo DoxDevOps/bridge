@@ -1,27 +1,46 @@
-from utils import imp_exp_func
-from exporters import get_os_details, get_versions, ping_exporter
+from multiprocessing import Process
+import time
+import random
+from utils import imp_exp_func, net
+from exporters import get_host_details
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
-hosts = imp_exp_func.get_data_from_api(os.getenv('IMPORTER_ENDPOINT'))
-headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-app_dirs = os.getenv('APP_DIRS').split(',')
+def init():
+    hosts = imp_exp_func.get_data_from_api(os.getenv('IMPORTER_ENDPOINT'))
+    random.shuffle(hosts)
+    headers = {'Content-type': 'application/json',
+               'Accept': 'text/plain', 'Authorization': os.getenv('EXPORTER_KEY')}
+    app_dirs = os.getenv('APP_DIRS').split(',')
+    # define a list to keep track of all processes
+    processes = []
+    count = 0
 
-for host in hosts:
+    for host in hosts:
 
-    ip_address = host["fields"]["ip_address"]
-    user_name = host["fields"]["username"]
-    site_name = host["fields"]["name"]
+        ip_address = host["fields"]["ip_address"]
+        user_name = host["fields"]["username"]
+        site_name = host["fields"]["name"]
 
-    # exports versions of apps on the host
-    get_versions(ip_address, user_name, app_dirs, headers)
+        # create a new process instance
+        # exports os details
+        p_process = Process(target=get_host_details,
+                            args=(ip_address, user_name, headers,))
+        # start the process
+        p_process.start()
+        # add the process to the list
+        processes.append(p_process)
 
-    # exports results of a ping of host
-    ping_exporter(ip_address, headers)
+    # wait for all processes to finish
+    for process in processes:
+        process.join()
+    return True
 
-    # exports os details
-    get_os_details(ip_address, user_name, headers)
-
-# for test
-#get_os_details('10.43.156.9', 'meduser', headers)
+if __name__ == '__main__':
+    start_time = time.time()
+    if init():
+        end_time = time.time()
+        runtime = end_time - start_time
+        print("########################################################################################################")
+        print("Runtime: ", runtime, " seconds")
