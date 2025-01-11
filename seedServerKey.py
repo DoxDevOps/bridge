@@ -8,7 +8,6 @@ load_dotenv()
 
 def seed():
     hosts = imp_exp_func.get_data_from_api(os.getenv('IMPORTER_ENDPOINT'))
-    # Shuffle the array in place
     random.shuffle(hosts)
 
     processes = []
