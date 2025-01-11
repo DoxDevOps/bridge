@@ -13,15 +13,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def host_is_reachable(ip_address, port=22):
+    sock = None
     try:
         # Create a socket object
         sock = socket.create_connection((ip_address, port), timeout=5)
-        # Close the socket
         sock.close()
         return True
     except (socket.timeout, ConnectionRefusedError):
-        sock.close()
         return False
+    except Exception as e:
+        if sock:
+            sock.close()
+        raise e
 
 def get_service_name(service):
     parts = service.split('.')
@@ -59,29 +62,78 @@ class AsyncParamikoSSHClient(paramiko.SSHClient):
         future = loop.run_in_executor(None, self._connect, self.host, self.username, password)
         await future
 
-    def _connect_key_based(self, host, username):
-        try:
-            self.load_system_host_keys()
-            self.set_missing_host_key_policy(paramiko.WarningPolicy())
-
-            # Determine the path to the private key dynamically
-            private_key_path = os.path.expanduser("~/.ssh/id_rsa")  # Default path
-            if "SSH_PRIVATE_KEY_PATH" in os.environ:
-                private_key_path = os.environ["SSH_PRIVATE_KEY_PATH"]
-
-            mykey = paramiko.RSAKey(filename=private_key_path)
-
-            self.connect(hostname=host, username=username, pkey=mykey, port=22)
-        except Exception as e:
-            with open("setpolicykey.txt", "a") as file:
-                file.write(f"ssh {self.username}@{self.host}\n")
-
-            print(f"connect key based error:  {str(e)} for HOST: {self.host}")
-
     def _connect(self, host, username, password):
         # self.connect(host, username, password)
         self.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.connect(hostname=host, username=username, password=password, port=22)
+
+    def _connect_key_based(self, host, username):
+        try:
+            self.load_system_host_keys()
+            self.set_missing_host_key_policy(paramiko.WarningPolicy())
+            
+            # Check common key locations
+            key_paths = [
+                ("~/.ssh/id_ed25519", paramiko.Ed25519Key),
+                ("~/.ssh/id_rsa", paramiko.RSAKey),
+                ("~/.ssh/id_ecdsa", paramiko.ECDSAKey),
+                ("~/.ssh/id_dsa", paramiko.DSSKey)
+            ]
+            
+            # Override with environment variable if set
+            if "SSH_PRIVATE_KEY_PATH" in os.environ:
+                custom_path = os.environ["SSH_PRIVATE_KEY_PATH"]
+                # Add the custom path to the start of our list
+                key_paths.insert(0, (custom_path, None))  # None means we'll detect type
+                
+            connected = False
+            last_exception = None
+            
+            for key_path, key_type in key_paths:
+                try:
+                    full_path = os.path.expanduser(key_path)
+                    if not os.path.exists(full_path):
+                        continue
+                        
+                    print(f"Attempting connection to {host} with key at {full_path}")
+                    
+                    # If key_type is None (custom path), try all key types
+                    if key_type is None:
+                        key_types = [paramiko.Ed25519Key, paramiko.RSAKey, 
+                                paramiko.ECDSAKey, paramiko.DSSKey]
+                    else:
+                        key_types = [key_type]
+                    
+                    # Try each possible key type for this file
+                    for kt in key_types:
+                        try:
+                            mykey = kt.from_private_key_file(full_path)
+                            self.connect(hostname=host, username=username, 
+                                    pkey=mykey, port=22)
+                            connected = True
+                            print(f"Successfully connected using {full_path}")
+                            return True
+                        except (paramiko.SSHException, Exception) as e:
+                            last_exception = e
+                            continue
+                            
+                except Exception as e:
+                    last_exception = e
+                    continue
+                    
+            if not connected:
+                # If we got here, no connection was successful
+                with open("setpolicykey.txt", "a") as file:
+                    file.write(f"ssh {username}@{host}\n")
+                error_msg = str(last_exception) if last_exception else "No valid keys found"
+                print(f"connect key based error: {error_msg} for HOST: {host}")
+                return False
+                
+        except Exception as e:
+            with open("setpolicykey.txt", "a") as file:
+                file.write(f"ssh {username}@{host}\n")
+            print(f"connect key based error: {str(e)} for HOST: {host}")
+            return False
 
     async def send_command(self, command):
         channel = self.exec_command(command)
@@ -113,7 +165,7 @@ class AsyncParamikoSSHClient(paramiko.SSHClient):
         channel.close()
         return output
 
-import aioredis
+from redis.asyncio import Redis
 
 class RedisCls():
     def __init__(self):
@@ -124,7 +176,7 @@ class RedisCls():
 
     async def connect(self):
         # connect to Redis asynchronously
-        self.redis = await aioredis.Redis(host=self.host, port=self.port, db=self.db)
+        self.redis = await Redis(host=self.host, port=self.port, db=self.db)
 
     async def updatePswrdDict(self, key, value):
         # update or insert a key-value pair asynchronously
@@ -145,29 +197,53 @@ class RedisCls():
 def ssh_copy_id(username, ip_address):
     if host_is_reachable(ip_address):
         try:
+            # Check if we can authenticate with password
             password = asyncio.run(check_if_password_works(remote_host=ip_address, ssh_username=username))
-            if (password):
-                # Generate an SSH key pair (if not already generated)
-                private_key_path = os.path.expanduser("~/.ssh/id_rsa")
+            if not password:
+                print(f"Could not authenticate with password for {username}@{ip_address}")
+                return False
+
+            # Define possible key paths and types
+            key_paths = [
+                ("~/.ssh/id_ed25519", "ssh-ed25519"),
+                ("~/.ssh/id_rsa", "ssh-rsa"),
+                ("~/.ssh/id_ecdsa", "ecdsa-sha2-nistp256"),
+                ("~/.ssh/id_dsa", "ssh-dss")
+            ]
+
+            # Try each key type
+            for private_key_path, key_type in key_paths:
+                private_key_path = os.path.expanduser(private_key_path)
                 public_key_path = f"{private_key_path}.pub"
 
-                # if not os.path.exists(private_key_path) or not os.path.exists(public_key_path):
-                #     key = asyncio.run(asyncssh.generate_private_key("ssh-rsa"))
-                #     with open(private_key_path, "w") as private_key_file:
-                #         private_key_file.write(key.export_private_key("openssh").decode())
+                # If we find a valid public key, use it
+                if os.path.exists(public_key_path):
+                    try:
+                        # Read the public key
+                        with open(public_key_path, "r") as pubkey_file:
+                            public_key = pubkey_file.read().strip()
 
-                #     with open(public_key_path, "w") as public_key_file:
-                #         public_key_file.write(key.export_public_key("openssh").decode())
+                        # Try to add the key
+                        print(f"Attempting to copy {key_type} public key to {username}@{ip_address}")
+                        asyncio.run(add_public_key_to_authorized_keys(
+                            ip_address, username, password, public_key))
+                        print(f"Successfully copied {key_type} public key to remote server's authorized_keys")
+                        return True
 
-                # Read the public key
-                with open(public_key_path, "r") as pubkey_file:
-                    public_key = pubkey_file.read().strip()
+                    except Exception as e:
+                        print(f"Failed to copy {key_type} key: {str(e)}")
+                        continue
 
-                asyncio.run(add_public_key_to_authorized_keys(ip_address, username, password, public_key))
+            # If we get here, no keys were successfully copied
+            print(f"No valid SSH keys found for {username}@{ip_address}")
+            return False
 
-                print("Public key copied to remote server's authorized_keys.")
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error in ssh_copy_id for {username}@{ip_address}: {str(e)}")
+            return False
+    else:
+        print(f"Host {ip_address} is not reachable")
+        return False
 
 
 async def add_public_key_to_authorized_keys(ip_address, username, password, public_key):
@@ -178,7 +254,7 @@ async def add_public_key_to_authorized_keys(ip_address, username, password, publ
         await client.send_sudo_command(password, 'sudo chmod 700 ~/.ssh')
         await client.send_sudo_command(password, 'sudo chmod 600 ~/.ssh/authorized_keys')
         sftp = await client.custom_open_sftp()
-        sftp.put(os.path.expanduser("~/.ssh/id_rsa")+'.pub', '' + 'yts')
+        sftp.put(os.path.expanduser("~/.ssh/id_ed25519")+'.pub', '' + 'yts')
         await client.send_sudo_command(password, 'echo "$(cat yts)" >> ~/.ssh/authorized_keys')
         await client.send_sudo_command(password, 'sudo rm yts')
         sftp.close()
